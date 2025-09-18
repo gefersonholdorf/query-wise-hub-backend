@@ -9,6 +9,7 @@ import {
 	type ZodTypeProvider,
 } from "fastify-type-provider-zod";
 import { env } from "./env";
+import { httpCreateRoute } from "./http/http";
 
 const app = fastify().withTypeProvider<ZodTypeProvider>();
 
@@ -31,6 +32,8 @@ app.register(fastifySwagger, {
 app.register(fastifyApiReference, {
 	routePrefix: "/docs",
 });
+
+app.register(httpCreateRoute);
 
 app.listen({
 	host: "0.0.0.0",
