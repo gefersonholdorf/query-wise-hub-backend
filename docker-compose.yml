@@ -32,6 +32,17 @@ services:
     networks:
       - appnet
 
+  backend:
+    build: .
+    container_name: qw_backend
+    restart: unless-stopped
+    ports:
+      - "3378:3378"
+    depends_on:
+      - qdrant
+    networks:
+      - appnet
+
 networks:
   appnet:
     driver: bridge
