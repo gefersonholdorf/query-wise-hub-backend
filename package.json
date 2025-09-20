@@ -16,6 +16,7 @@
     "typescript": "^5.9.2"
   },
   "dependencies": {
+    "@fastify/cors": "^11.1.0",
     "@fastify/swagger": "^9.5.1",
     "@qdrant/js-client-rest": "^1.15.1",
     "@scalar/fastify-api-reference": "^1.35.6",

@@ -4,6 +4,7 @@ export interface KnowledgeBase {
 	payload?: {
 		problem: string;
 		solution: string;
+		createdAt: string;
 	};
 }
 
@@ -14,5 +15,21 @@ export interface KnowledgeBaseResult {
 	payload: {
 		problem: string;
 		solution: string;
+		createdAt: string;
 	};
+}
+
+export interface KnowledgeBasePayloadResult {
+	id: string;
+	payload: {
+		problem: string;
+		solution: string;
+		createdAt: string;
+	};
+}
+
+export interface KnowledgeSearchResult {
+	data: KnowledgeBasePayloadResult[];
+	nextCursor: string | null;
+	hasMore: boolean;
 }

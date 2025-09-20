@@ -28,12 +28,15 @@ export class CreateKnowledgeService
 
 		const id = crypto.randomUUID();
 
+		const createdAt = new Date().toISOString();
+
 		const newKnowledge = await this.knowledgeRepository.create({
 			id,
 			vector: embedding,
 			payload: {
 				problem,
 				solution,
+				createdAt,
 			},
 		});
 

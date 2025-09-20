@@ -9,8 +9,7 @@ export const matchKnowledgeRoute: FastifyPluginCallbackZod = (app) => {
 		"/knowledges/match",
 		{
 			schema: {
-				summary:
-					"Responsável por verificar a similaridade de uma mensagem com os conhecimentos ja cadastrados",
+				summary: "Search for similarity of knowledge",
 				tags: ["Knowledge"],
 				description:
 					"Este endpoint permite verificar a similaridade de uma mensagem com os conhecimentos ja cadastrados no sistema retornando os conhecimento mais próximos realizado através de um cálculo de similaridades com embeddings.",
