@@ -1,16 +1,19 @@
+import { PrismaSolutionRepository } from "../../databases/prisma/prisma-solution-repository";
 import { QdrantKnowledgeBase } from "../../databases/qdrant/qdrant-knowledge-repository";
 import { right, type Either } from "../../utils/either";
 import { ollamaEmbeddingService } from "../ollama/ollama-embedding";
 import type { Service } from "../service";
 
 export interface CreateKnowledgeServiceRequest {
-	problem: string;
+	problems: string[];
 	solution: string;
+	tags: string | null;
+	isActive: boolean;
 }
 
 export type CreateKnowledgeServiceResponse = Either<
 	never,
-	{ knowledgeId: string }
+	{ solutionId: number }
 >;
 
 export class CreateKnowledgeService
@@ -18,32 +21,55 @@ export class CreateKnowledgeService
 		Service<CreateKnowledgeServiceRequest, CreateKnowledgeServiceResponse>
 {
 	knowledgeRepository = new QdrantKnowledgeBase();
+	solutionRepository = new PrismaSolutionRepository();
 
 	async execute(
 		request: CreateKnowledgeServiceRequest,
 	): Promise<CreateKnowledgeServiceResponse> {
-		const { problem, solution } = request;
+		const { problems, solution, tags, isActive } = request;
 
-		const embedding = await ollamaEmbeddingService(problem);
+		let newSolution: { solutionId: number };
 
-		const id = crypto.randomUUID();
-
-		const createdAt = new Date().toISOString();
-
-		const newKnowledge = await this.knowledgeRepository.create({
-			id,
-			vector: embedding,
-			payload: {
-				problem,
+		try {
+			newSolution = await this.solutionRepository.create({
 				solution,
-				createdAt,
-			},
-		});
+				createdBy: "Suporte Lusati",
+				isActive,
+				tags,
+			});
+		} catch (error) {
+			throw new Error("Erro interno.");
+		}
 
-		const { knowledgeId } = newKnowledge;
+		const { solutionId } = newSolution;
+
+		for (const problem of problems) {
+			console.log(problem);
+			const embedding = await ollamaEmbeddingService(problem);
+
+			const id = crypto.randomUUID();
+
+			const createdAt = new Date().toISOString();
+			const updatedAt = new Date().toISOString();
+
+			try {
+				await this.knowledgeRepository.create({
+					id,
+					vector: embedding,
+					payload: {
+						problem,
+						solutionId,
+						createdAt,
+						updatedAt,
+					},
+				});
+			} catch (error) {
+				console.error(error);
+			}
+		}
 
 		return right({
-			knowledgeId,
+			solutionId,
 		});
 	}
 }

@@ -98,10 +98,10 @@ export class QdrantKnowledgeBase implements KnowledgeBaseRepository {
 	}
 
 	async save() {
-		const result = await qdrantClient.updateVectors("knowledge_base", {
-			points: {
-                [{}]
-            }
-		});
+		// const result = await qdrantClient.updateVectors("knowledge_base", {
+		// 	points: {
+		//         [{}]
+		//     }
+		// });
 	}
 }

@@ -3,8 +3,9 @@ export interface KnowledgeBase {
 	vector: number[];
 	payload?: {
 		problem: string;
-		solution: string;
+		solutionId: number;
 		createdAt: string;
+		updatedAt: string;
 	};
 }
 
