@@ -16,7 +16,7 @@ export const createKnowledgeRoute: FastifyPluginCallbackZod = (app) => {
 				body: z.object({
 					problems: z.array(z.string()),
 					solution: z.string(),
-					tags: z.string().optional(),
+					tags: z.string().nullable(),
 					isActive: z.boolean(),
 				}),
 				response: {

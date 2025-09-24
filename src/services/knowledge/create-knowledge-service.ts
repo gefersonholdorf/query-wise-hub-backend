@@ -38,35 +38,36 @@ export class CreateKnowledgeService
 				tags,
 			});
 		} catch (error) {
+			console.error(error);
 			throw new Error("Erro interno.");
 		}
 
 		const { solutionId } = newSolution;
 
-		for (const problem of problems) {
-			console.log(problem);
-			const embedding = await ollamaEmbeddingService(problem);
+		await Promise.all(
+			problems.map(async (problem) => {
+				const embedding = await ollamaEmbeddingService(problem);
 
-			const id = crypto.randomUUID();
+				const id = crypto.randomUUID();
+				const createdAt = new Date().toISOString();
+				const updatedAt = new Date().toISOString();
 
-			const createdAt = new Date().toISOString();
-			const updatedAt = new Date().toISOString();
-
-			try {
-				await this.knowledgeRepository.create({
-					id,
-					vector: embedding,
-					payload: {
-						problem,
-						solutionId,
-						createdAt,
-						updatedAt,
-					},
-				});
-			} catch (error) {
-				console.error(error);
-			}
-		}
+				try {
+					await this.knowledgeRepository.create({
+						id,
+						vector: embedding,
+						payload: {
+							problem,
+							solutionId,
+							createdAt,
+							updatedAt,
+						},
+					});
+				} catch (error) {
+					console.error(error);
+				}
+			}),
+		);
 
 		return right({
 			solutionId,
