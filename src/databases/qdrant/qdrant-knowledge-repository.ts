@@ -97,6 +97,25 @@ export class QdrantKnowledgeBase implements KnowledgeBaseRepository {
 		return { data, nextCursor, hasMore };
 	}
 
+	async searchBySolutionId(id: number): Promise<{ data: string[] }> {
+		const res = await qdrantClient.scroll("knowledge_base", {
+			filter: {
+				must: [
+					{
+						key: "solutionId",
+						match: { value: id },
+					},
+				],
+			},
+		});
+
+		const points: string[] = res.points.map((p) => {
+			return String(p.payload?.problem ?? "");
+		});
+
+		return { data: points };
+	}
+
 	async save() {
 		// const result = await qdrantClient.updateVectors("knowledge_base", {
 		// 	points: {

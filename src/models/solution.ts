@@ -31,3 +31,5 @@ export interface CreateSolution
 		| "createdAt"
 		| "updatedAt"
 	> {}
+
+export interface FetchSolutions extends Solution {}

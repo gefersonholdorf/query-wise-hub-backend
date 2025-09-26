@@ -4,17 +4,23 @@ import { createKnowledgeRoute } from "./routes/knowledge_base/create-knowledge-r
 import { matchKnowledgeRoute } from "./routes/knowledge_base/match-knowledge-route";
 import { fetchKnowledgeToAnalyzeRoute } from "./routes/knowledge_base/fetch-knowledges-route";
 import { createAnalysisRoute } from "./routes/analysis/create-analysis-route";
+import { healthDBRoute } from "./routes/health/health-databases";
+import { fetchAnalysisRoute } from "./routes/analysis/fetch-analysis-route";
+import { summaryAnalysisRoute } from "./routes/analysis/summary-analysis-route";
 
 export function httpCreateRoute(app: FastifyInstance) {
 	app.register(
 		async (instance) => {
 			instance.register(healthRoute);
+			instance.register(healthDBRoute);
 
 			instance.register(createKnowledgeRoute);
 			instance.register(matchKnowledgeRoute);
 			instance.register(fetchKnowledgeToAnalyzeRoute);
 
 			instance.register(createAnalysisRoute);
+			instance.register(fetchAnalysisRoute);
+			instance.register(summaryAnalysisRoute);
 		},
 		{
 			prefix: "/api/v1",

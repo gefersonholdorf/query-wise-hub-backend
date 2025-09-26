@@ -19,5 +19,6 @@ export interface KnowledgeBaseRepository {
 		params: CursorPaginationParams,
 		filtering: Filtering,
 	): Promise<KnowledgeSearchResult>;
+	searchBySolutionId(id: number): Promise<{ data: string[] }>;
 	searchMatch(search: number[]): Promise<{ data: KnowledgeBaseResult[] }>;
 }

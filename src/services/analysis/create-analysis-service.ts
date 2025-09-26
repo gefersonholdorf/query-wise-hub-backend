@@ -33,6 +33,8 @@ export class CreateAnalysisService
 
 		const problems = await pollinationsGenerateProblems(problem);
 
+		console.log(problems);
+
 		try {
 			newSolution = await this.solutionRepository.createAnalysis({
 				solution,
