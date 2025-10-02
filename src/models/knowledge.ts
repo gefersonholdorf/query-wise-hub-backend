@@ -3,7 +3,9 @@ export interface KnowledgeBase {
 	vector: number[];
 	payload?: {
 		problem: string;
-		solution: string;
+		solutionId: number;
+		createdAt: string;
+		updatedAt: string;
 	};
 }
 
@@ -13,6 +15,22 @@ export interface KnowledgeBaseResult {
 	score: number;
 	payload: {
 		problem: string;
-		solution: string;
+		solutionId: number;
+		createdAt: string;
 	};
+}
+
+export interface KnowledgeBasePayloadResult {
+	id: string;
+	payload: {
+		problem: string;
+		solutionId: number;
+		createdAt: string;
+	};
+}
+
+export interface KnowledgeSearchResult {
+	data: KnowledgeBasePayloadResult[];
+	nextCursor: string | null;
+	hasMore: boolean;
 }

@@ -1,40 +1,45 @@
+/** biome-ignore-all assist/source/organizeImports: <"explanation"> */
 import { PrismaSolutionRepository } from "../../databases/prisma/prisma-solution-repository";
 import { QdrantKnowledgeBase } from "../../databases/qdrant/qdrant-knowledge-repository";
 import { right, type Either } from "../../utils/either";
 import { ollamaEmbeddingService } from "../ollama/ollama-embedding";
+import { pollinationsGenerateProblems } from "../pollinations/pollinations-generate-problems";
 import type { Service } from "../service";
 
-export interface CreateKnowledgeServiceRequest {
-	problems: string[];
+export interface CreateAnalysisServiceRequest {
+	problem: string;
 	solution: string;
 	tags: string | null;
-	isActive: boolean;
 }
 
-export type CreateKnowledgeServiceResponse = Either<
+export type CreateAnalysisServiceResponse = Either<
 	never,
-	{ solutionId: number }
+	{ analysisId: number }
 >;
 
-export class CreateKnowledgeService
+export class CreateAnalysisService
 	implements
-		Service<CreateKnowledgeServiceRequest, CreateKnowledgeServiceResponse>
+		Service<CreateAnalysisServiceRequest, CreateAnalysisServiceResponse>
 {
-	knowledgeRepository = new QdrantKnowledgeBase();
+	analysisRepository = new QdrantKnowledgeBase();
 	solutionRepository = new PrismaSolutionRepository();
 
 	async execute(
-		request: CreateKnowledgeServiceRequest,
-	): Promise<CreateKnowledgeServiceResponse> {
-		const { problems, solution, tags, isActive } = request;
+		request: CreateAnalysisServiceRequest,
+	): Promise<CreateAnalysisServiceResponse> {
+		const { problem, solution, tags } = request;
 
 		let newSolution: { solutionId: number };
 
+		const problems = await pollinationsGenerateProblems(problem);
+
+		console.log(problems);
+
 		try {
-			newSolution = await this.solutionRepository.create({
+			newSolution = await this.solutionRepository.createAnalysis({
 				solution,
 				createdBy: "Suporte Lusati",
-				isActive,
+				isActive: true,
 				tags,
 			});
 		} catch (error) {
@@ -53,7 +58,7 @@ export class CreateKnowledgeService
 				const updatedAt = new Date().toISOString();
 
 				try {
-					await this.knowledgeRepository.create({
+					await this.analysisRepository.create({
 						id,
 						vector: embedding,
 						payload: {
@@ -70,7 +75,7 @@ export class CreateKnowledgeService
 		);
 
 		return right({
-			solutionId,
+			analysisId: solutionId,
 		});
 	}
 }
