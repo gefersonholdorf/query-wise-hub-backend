@@ -1,4 +1,9 @@
-import type { CreateSolution, FetchSolutions } from "../../models/solution";
+/** biome-ignore-all lint/complexity/noBannedTypes: <"explanation"> */
+import type {
+	CreateSolution,
+	FetchSolutions,
+	Solution,
+} from "../../models/solution";
 
 export interface PaginationParams {
 	page?: number;
@@ -29,4 +34,6 @@ export interface SolutionRepository {
 		totalPerPage: number;
 	}>;
 	summary(): Promise<{ summary: SolutionCardsSummary }>;
+	getById(id: number): Promise<{ solution: Solution | null }>;
+	save(solution: Solution, id: number): Promise<{}>;
 }

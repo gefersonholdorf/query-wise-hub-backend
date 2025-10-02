@@ -34,7 +34,7 @@ export class QdrantKnowledgeBase implements KnowledgeBaseRepository {
 		const data: KnowledgeBaseResult[] = result.map((item) => {
 			const payload = (item.payload ?? {}) as {
 				problem?: string;
-				solution?: string;
+				solutionId?: number;
 				createdAt?: string;
 			};
 
@@ -44,7 +44,7 @@ export class QdrantKnowledgeBase implements KnowledgeBaseRepository {
 				version: item.version,
 				payload: {
 					problem: payload.problem ?? "",
-					solution: payload.solution ?? "",
+					solutionId: payload.solutionId ?? 0,
 					createdAt: payload.createdAt ?? "",
 				},
 			};
@@ -77,7 +77,7 @@ export class QdrantKnowledgeBase implements KnowledgeBaseRepository {
 				id: String(p.id),
 				payload: {
 					problem: (payload?.problem as string) ?? "",
-					solution: (payload?.solution as string) ?? "",
+					solutionId: (payload?.solutionId as number) ?? 0,
 					createdAt: (payload?.createdAt as string) ?? "",
 				},
 			};

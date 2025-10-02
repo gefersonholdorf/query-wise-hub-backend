@@ -18,15 +18,18 @@ export const matchKnowledgeRoute: FastifyPluginCallbackZod = (app) => {
 				}),
 				response: {
 					200: z.object({
-						bestMatch: z
-							.object({
+						matchs: z.array(
+							z.object({
 								id: z.string(),
 								version: z.number(),
 								score: z.number(),
 								problem: z.string(),
-								solution: z.string(),
-							})
-							.nullable(),
+								solution: z.object({
+									solutionId: z.number(),
+									solution: z.string(),
+								}),
+							}),
+						),
 					}),
 					500: z.object({
 						message: z.string(),
@@ -47,22 +50,21 @@ export const matchKnowledgeRoute: FastifyPluginCallbackZod = (app) => {
 					.send({ message: "Erro ao obter as correspondências." });
 			}
 
-			const { bestMatch } = serviceResponse.value;
-
-			if (!bestMatch) {
-				return reply.status(200).send({
-					bestMatch: null,
-				});
-			}
+			const { matchs } = serviceResponse.value;
 
 			return reply.status(200).send({
-				bestMatch: {
-					id: String(bestMatch.id),
-					version: bestMatch.version,
-					score: bestMatch.score,
-					problem: bestMatch.payload.problem,
-					solution: bestMatch.payload.solution,
-				},
+				matchs: matchs.map((item) => {
+					return {
+						id: item.id,
+						version: item.version,
+						score: item.score,
+						problem: item.problem,
+						solution: {
+							solutionId: item.solution.solutionId,
+							solution: item.solution.solution,
+						},
+					};
+				}),
 			});
 		},
 	);

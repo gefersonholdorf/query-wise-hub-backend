@@ -1,8 +1,22 @@
+/** biome-ignore-all assist/source/organizeImports: <"explanation"> */
+import { PrismaSolutionRepository } from "../../databases/prisma/prisma-solution-repository";
 import { QdrantKnowledgeBase } from "../../databases/qdrant/qdrant-knowledge-repository";
-import type { KnowledgeBaseResult } from "../../models/knowledge";
 import { right, type Either } from "../../utils/either";
 import { ollamaEmbeddingService } from "../ollama/ollama-embedding";
 import type { Service } from "../service";
+
+export interface MatchKnowledgeServiceResponseResult {
+	matchs: {
+		id: string;
+		version: number;
+		score: number;
+		problem: string;
+		solution: {
+			solutionId: number;
+			solution: string;
+		};
+	}[];
+}
 
 export interface MatchKnowledgeServiceRequest {
 	message: string;
@@ -10,7 +24,7 @@ export interface MatchKnowledgeServiceRequest {
 
 export type MatchKnowledgeServiceResponse = Either<
 	never,
-	{ bestMatch: KnowledgeBaseResult | null }
+	MatchKnowledgeServiceResponseResult
 >;
 
 export class MatchKnowledgeService
@@ -18,6 +32,7 @@ export class MatchKnowledgeService
 		Service<MatchKnowledgeServiceRequest, MatchKnowledgeServiceResponse>
 {
 	knowledgeRepository = new QdrantKnowledgeBase();
+	solutionRepository = new PrismaSolutionRepository();
 
 	async execute(
 		request: MatchKnowledgeServiceRequest,
@@ -33,21 +48,31 @@ export class MatchKnowledgeService
 				.filter((item) => item.score >= 0.7)
 				.sort((a, b) => b.score - a.score);
 
-			if (response.length > 0) {
-				return right({
-					bestMatch: response[0],
-				});
-			}
-
 			return right({
-				bestMatch: null,
+				matchs: await Promise.all(
+					response.map(async (item) => {
+						const solution = await this.solutionRepository.getById(
+							item.payload.solutionId,
+						);
+						return {
+							id: item.id,
+							version: item.version,
+							score: item.score,
+							problem: item.payload.problem,
+							solution: {
+								solutionId: solution.solution?.id || 0,
+								solution: solution.solution?.solution || "",
+							},
+						};
+					}),
+				),
 			});
 		} catch (error) {
 			console.error(error);
 		}
 
 		return right({
-			bestMatch: null,
+			matchs: [],
 		});
 	}
 }

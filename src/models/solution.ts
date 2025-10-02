@@ -1,5 +1,3 @@
-import type { status } from "@prisma/client";
-
 export interface Solution {
 	id: number;
 	solution: string;

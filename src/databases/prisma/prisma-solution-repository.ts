@@ -1,4 +1,9 @@
-import type { CreateSolution, FetchSolutions } from "../../models/solution";
+/** biome-ignore-all lint/complexity/noBannedTypes: <"explanation"> */
+import type {
+	CreateSolution,
+	FetchSolutions,
+	Solution,
+} from "../../models/solution";
 import { prismaClient } from "../client";
 import type {
 	FilteringParams,
@@ -152,5 +157,63 @@ export class PrismaSolutionRepository implements SolutionRepository {
 				total,
 			},
 		};
+	}
+
+	async getById(id: number): Promise<{ solution: Solution | null }> {
+		const solution = await prismaClient.solutions.findUnique({
+			where: {
+				id,
+			},
+		});
+
+		if (!solution) {
+			return {
+				solution: null,
+			};
+		}
+
+		return {
+			solution: {
+				id,
+				approvedAt: solution.approvedAt,
+				approvedBy: solution.approvedBy,
+				createdAt: solution.createdAt,
+				createdBy: solution.createdBy,
+				deniedAt: solution.deniedAt,
+				deniedBy: solution.deniedBy,
+				isActive: solution.isActive,
+				isAnalysis: solution.isAnalysis,
+				observation: solution.observation,
+				solution: solution.solution,
+				status: solution.status,
+				tags: solution.tags,
+				updatedAt: solution.updatedAt,
+			},
+		};
+	}
+
+	async save(solution: Solution, id: number): Promise<{}> {
+		await prismaClient.solutions.update({
+			where: {
+				id,
+			},
+			data: {
+				solution: solution.solution,
+				approvedBy: solution.approvedBy,
+				approvedAt: solution.approvedAt,
+				createdAt: solution.createdAt,
+				createdBy: solution.createdBy,
+				deniedAt: solution.deniedAt,
+				deniedBy: solution.deniedBy,
+				isActive: solution.isActive,
+				isAnalysis: solution.isAnalysis,
+				observation: solution.observation,
+				status: solution.status,
+				tags: solution.tags,
+				updatedAt: solution.updatedAt,
+			},
+		});
+
+		return {};
 	}
 }
