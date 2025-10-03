@@ -8,6 +8,7 @@ import { healthDBRoute } from "./routes/health/health-databases";
 import { fetchAnalysisRoute } from "./routes/analysis/fetch-analysis-route";
 import { summaryAnalysisRoute } from "./routes/analysis/summary-analysis-route";
 import { confirmAnalysisRoute } from "./routes/analysis/confirm-analysis-route";
+import { chatRoute } from "./routes/mcp/chat-route";
 
 export function httpCreateRoute(app: FastifyInstance) {
 	app.register(
@@ -23,6 +24,8 @@ export function httpCreateRoute(app: FastifyInstance) {
 			instance.register(fetchAnalysisRoute);
 			instance.register(summaryAnalysisRoute);
 			instance.register(confirmAnalysisRoute);
+
+			instance.register(chatRoute);
 		},
 		{
 			prefix: "/api/v1",

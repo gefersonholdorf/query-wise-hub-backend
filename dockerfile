@@ -8,4 +8,6 @@ COPY . .
 
 EXPOSE 3379
 
+RUN npx prisma generate
+
 CMD ["npm", "run", "dev"]
