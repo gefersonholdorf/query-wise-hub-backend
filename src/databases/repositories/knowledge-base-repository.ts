@@ -4,9 +4,9 @@ import type {
 	KnowledgeSearchResult,
 } from "../../models/knowledge";
 
-export interface CursorPaginationParams {
-	cursor?: string;
-	limit?: number;
+export interface PaginationParams {
+	page?: number;
+	quantityPerPage?: number;
 }
 
 export interface Filtering {
@@ -16,9 +16,9 @@ export interface Filtering {
 export interface KnowledgeBaseRepository {
 	create(data: KnowledgeBase): Promise<{ knowledgeId: string }>;
 	search(
-		params: CursorPaginationParams,
+		params: PaginationParams,
 		filtering: Filtering,
-	): Promise<KnowledgeSearchResult>;
+	): Promise<{ data: string[] }>;
 	searchBySolutionId(id: number): Promise<{ data: string[] }>;
 	searchMatch(search: number[]): Promise<{ data: KnowledgeBaseResult[] }>;
 }

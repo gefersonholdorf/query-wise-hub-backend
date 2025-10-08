@@ -19,7 +19,7 @@ export const chatRoute: FastifyPluginAsyncZod = async (app) => {
 		async (request, reply) => {
 			const { message } = request.body;
 			const result = await backendMCP(message);
-			return reply.send({ message: result });
+			return reply.status(200).send({ message: result });
 		},
 	);
 };

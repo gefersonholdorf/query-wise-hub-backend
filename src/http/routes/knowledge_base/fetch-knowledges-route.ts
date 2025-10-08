@@ -11,28 +11,30 @@ export const fetchKnowledgeToAnalyzeRoute: FastifyPluginCallbackZod = (app) => {
 		{
 			schema: {
 				tags: ["Knowledge"],
-				summary: "Fetch knowledges by cursor pagination and filterings",
+				summary: "Fetch knowledges",
 				description:
 					"Este endpoint permite criar um novo conhecimento através de curadoria. É necessário informar os dados obrigatórios (problema, solução).",
 				querystring: z.object({
-					cursor: z.string().optional(),
-					limit: z.coerce.number().optional(),
+					page: z.coerce.number().optional(),
+					totalPerPage: z.coerce.number().optional(),
 					problem: z.string().optional(),
 				}),
 				response: {
 					200: z.object({
 						data: z.array(
 							z.object({
-								id: z.string(),
-								payload: z.object({
-									problem: z.string(),
-									solution: z.string(),
-									createdAt: z.string(),
-								}),
+								id: z.number(),
+								problems: z.array(z.string()),
+								solution: z.string(),
+								createdAt: z.date(),
+								createdBy: z.string(),
+								tags: z.string().nullable(),
+								status: z.enum(["PENDING", "APPROVED", "DENIED"]),
 							}),
 						),
-						nextCursor: z.string().nullable(),
-						hasMore: z.boolean(),
+						total: z.number(),
+						page: z.number(),
+						totalPerPage: z.number(),
 					}),
 					500: z.object({
 						message: z.string(),
@@ -41,26 +43,26 @@ export const fetchKnowledgeToAnalyzeRoute: FastifyPluginCallbackZod = (app) => {
 			},
 		},
 		async (request, reply) => {
-			const { cursor, limit, problem } = request.query;
+			const { page, totalPerPage, problem } = request.query;
 
-			const resultService = await fetchKnowledgeService.execute({
-				cursor,
-				limit,
+			const serviceResponse = await fetchKnowledgeService.execute({
+				page,
+				totalPerPage,
 				problem,
 			});
 
-			if (resultService.isLeft()) {
-				return reply.status(500).send({
-					message: "Erro ao consultar os conhecimentos.",
-				});
+			if (serviceResponse.isLeft()) {
+				return reply
+					.status(500)
+					.send({ message: "Erro ao listar conhecimentos." });
 			}
 
-			const { data, hasMore, nextCursor } = resultService.value.result;
-
+			const { result } = serviceResponse.value;
 			return reply.status(200).send({
-				data,
-				nextCursor,
-				hasMore,
+				data: result.data,
+				total: result.total,
+				page: result.page,
+				totalPerPage: result.totalPerPage,
 			});
 		},
 	);

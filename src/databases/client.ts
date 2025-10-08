@@ -1,3 +1,4 @@
+/** biome-ignore-all assist/source/organizeImports: <"explanation"> */
 import { QdrantClient } from "@qdrant/js-client-rest";
 import { env } from "../env";
 import { PrismaClient } from "@prisma/client";

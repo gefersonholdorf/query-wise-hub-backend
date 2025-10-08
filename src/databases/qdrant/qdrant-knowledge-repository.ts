@@ -7,7 +7,7 @@ import type {
 } from "../../models/knowledge";
 import { qdrantClient } from "../client";
 import type {
-	CursorPaginationParams,
+	PaginationParams,
 	Filtering,
 	KnowledgeBaseRepository,
 } from "../repositories/knowledge-base-repository";
@@ -56,45 +56,33 @@ export class QdrantKnowledgeBase implements KnowledgeBaseRepository {
 	}
 
 	async search(
-		params: CursorPaginationParams,
+		params: PaginationParams,
 		filtering: Filtering,
-	): Promise<KnowledgeSearchResult> {
-		const { cursor, limit = 1 } = params;
+	): Promise<{ data: string[] }> {
+		const { page = 1, quantityPerPage = 9 } = params;
 		const { problem } = filtering;
 
 		const result = await qdrantClient.scroll("knowledge_base", {
-			filter: cursor
-				? { must: [{ key: "createdAt", range: { lt: cursor } }] }
-				: undefined,
-			limit: limit + 1,
+			filter: {
+				must: [
+					{
+						key: "problem",
+						match: { text: problem ?? undefined },
+					},
+				],
+			},
+			limit: quantityPerPage,
+			offset: (page - 1) * quantityPerPage,
+			order_by: "createdAt",
 			with_payload: true,
 			with_vector: false,
 		});
 
-		let points: KnowledgeBasePayloadResult[] = result.points.map((p) => {
-			const payload = p.payload ?? {};
-			return {
-				id: String(p.id),
-				payload: {
-					problem: (payload?.problem as string) ?? "",
-					solutionId: (payload?.solutionId as number) ?? 0,
-					createdAt: (payload?.createdAt as string) ?? "",
-				},
-			};
+		const points: string[] = result.points.map((p) => {
+			return String(p.payload?.problem ?? "");
 		});
 
-		if (problem) {
-			points = points.filter((p) =>
-				p.payload.problem.toLowerCase().includes(problem.toLowerCase()),
-			);
-		}
-
-		const hasMore = points.length > limit;
-		const data = hasMore ? points.slice(0, limit) : points;
-		const nextCursor =
-			data.length > 0 ? data[data.length - 1].payload.createdAt : null;
-
-		return { data, nextCursor, hasMore };
+		return { data: points };
 	}
 
 	async searchBySolutionId(id: number): Promise<{ data: string[] }> {
