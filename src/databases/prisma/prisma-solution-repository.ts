@@ -126,6 +126,8 @@ export class PrismaSolutionRepository implements SolutionRepository {
 	}
 
 	async summary(): Promise<{ summary: SolutionCardsSummary }> {
+		const totalKnowledges = await prismaClient.solutions.count();
+
 		const totalPendings = await prismaClient.solutions.count({
 			where: {
 				isAnalysis: true,
@@ -151,6 +153,7 @@ export class PrismaSolutionRepository implements SolutionRepository {
 
 		return {
 			summary: {
+				totalKnowledges,
 				totalPendings,
 				totalApproveds,
 				totalDenieds,

@@ -15,6 +15,7 @@ export interface FilteringParams {
 }
 
 export interface SolutionCardsSummary {
+	totalKnowledges: number;
 	totalPendings: number;
 	totalApproveds: number;
 	totalDenieds: number;
