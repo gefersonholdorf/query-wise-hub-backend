@@ -12,6 +12,7 @@ export interface PaginationParams {
 
 export interface FilteringParams {
 	status?: "PENDING" | "APPROVED" | "DENIED";
+	filter?: string;
 }
 
 export interface SolutionCardsSummary {
@@ -34,16 +35,7 @@ export interface SolutionRepository {
 		page: number;
 		totalPerPage: number;
 	}>;
-	getKnowledges(
-		pagination: PaginationParams,
-		filtering: FilteringParams,
-	): Promise<{
-		solutions: FetchSolutions[];
-		total: number;
-		totalPage: number;
-		page: number;
-		totalPerPage: number;
-	}>;
+	getKnowledges(): Promise<{ solutions: FetchSolutions[] }>;
 	summary(): Promise<{ summary: SolutionCardsSummary }>;
 	getById(id: number): Promise<{ solution: Solution | null }>;
 	save(solution: Solution, id: number): Promise<{}>;

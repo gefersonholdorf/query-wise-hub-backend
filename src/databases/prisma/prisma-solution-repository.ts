@@ -125,33 +125,13 @@ export class PrismaSolutionRepository implements SolutionRepository {
 		};
 	}
 
-	async getKnowledges(
-		pagination: PaginationParams,
-		filtering: FilteringParams,
-	): Promise<{
-		solutions: FetchSolutions[];
-		total: number;
-		totalPage: number;
-		page: number;
-		totalPerPage: number;
-	}> {
-		const { page = 1, totalPerPage = 10 } = pagination;
-		const { status } = filtering;
-
+	async getKnowledges(): Promise<{ solutions: FetchSolutions[] }> {
 		const solutions = await prismaClient.solutions.findMany({
 			where: {
-				status: status ?? "APPROVED",
+				status: "APPROVED",
 			},
 			orderBy: {
 				id: "desc",
-			},
-			take: totalPerPage,
-			skip: (page - 1) * totalPerPage,
-		});
-
-		const total = await prismaClient.solutions.count({
-			where: {
-				status: status ?? "APPROVED",
 			},
 		});
 
@@ -192,10 +172,6 @@ export class PrismaSolutionRepository implements SolutionRepository {
 
 		return {
 			solutions: solutionsFormated,
-			total,
-			totalPage: solutionsFormated.length,
-			page,
-			totalPerPage,
 		};
 	}
 

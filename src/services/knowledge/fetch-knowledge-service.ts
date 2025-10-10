@@ -1,7 +1,7 @@
 /** biome-ignore-all assist/source/organizeImports: <"explanation"> */
+/** biome-ignore-all lint/complexity/useOptionalChain: <"explanation"> */
 import { PrismaSolutionRepository } from "../../databases/prisma/prisma-solution-repository";
 import { QdrantKnowledgeBase } from "../../databases/qdrant/qdrant-knowledge-repository";
-import type { KnowledgeSearchResult } from "../../models/knowledge";
 import { right, type Either } from "../../utils/either";
 import type { Service } from "../service";
 
@@ -42,18 +42,10 @@ export class FetchKnowledgeService
 	async execute(
 		request: FetchKnowledgeServiceRequest,
 	): Promise<FetchKnowledgeServiceResponse> {
-		const { problem, page, totalPerPage } = request;
+		const { problem, page = 1, totalPerPage = 9 } = request;
 
 		try {
-			const fetchSolutions = await this.solutionRepository.getKnowledges(
-				{
-					page,
-					totalPerPage,
-				},
-				{
-					status: "APPROVED",
-				},
-			);
+			const fetchSolutions = await this.solutionRepository.getKnowledges();
 
 			const { solutions } = fetchSolutions;
 
@@ -76,30 +68,46 @@ export class FetchKnowledgeService
 			);
 
 			if (!problem) {
+				const totalItems = knowledgeResult.length;
+
+				const startIndex = (page - 1) * totalPerPage;
+				const endIndex = startIndex + totalPerPage;
+
+				const paginatedData = knowledgeResult.slice(startIndex, endIndex);
+
 				return right({
 					result: {
-						data: knowledgeResult,
-						page: fetchSolutions.page,
-						total: fetchSolutions.total,
-						totalPage: fetchSolutions.totalPage,
-						totalPerPage: fetchSolutions.totalPerPage,
+						data: paginatedData,
+						page: page,
+						total: totalItems,
+						totalPage: paginatedData.length,
+						totalPerPage: totalPerPage,
 					},
 				});
 			}
 
-			const dataFiltering = knowledgeResult.filter((item) =>
-				item.problems.some((p) =>
-					p.toLowerCase().includes(problem.toLowerCase()),
-				),
-			);
+			const dataFiltering = knowledgeResult.filter((item) => {
+				const firstProblem = item.problems[0];
+				return (
+					firstProblem &&
+					firstProblem.toLowerCase().includes(problem.toLowerCase())
+				);
+			});
+
+			const totalItems = dataFiltering.length;
+
+			const startIndex = (page - 1) * totalPerPage;
+			const endIndex = startIndex + totalPerPage;
+
+			const paginatedData = knowledgeResult.slice(startIndex, endIndex);
 
 			return right({
 				result: {
-					data: dataFiltering,
-					page: fetchSolutions.page,
-					total: fetchSolutions.total,
-					totalPage: fetchSolutions.totalPage,
-					totalPerPage: fetchSolutions.totalPerPage,
+					data: paginatedData,
+					page: page,
+					total: totalItems,
+					totalPage: paginatedData.length,
+					totalPerPage: totalPerPage,
 				},
 			});
 		} catch (error) {
