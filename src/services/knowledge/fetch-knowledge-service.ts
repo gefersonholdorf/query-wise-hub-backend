@@ -25,6 +25,7 @@ export type FetchKnowledgeServiceResponse = Either<
 				status: "PENDING" | "APPROVED" | "DENIED";
 			}[];
 			total: number;
+			totalPage: number;
 			page: number;
 			totalPerPage: number;
 		};
@@ -44,7 +45,7 @@ export class FetchKnowledgeService
 		const { problem, page, totalPerPage } = request;
 
 		try {
-			const fetchSolutions = await this.solutionRepository.getAll(
+			const fetchSolutions = await this.solutionRepository.getKnowledges(
 				{
 					page,
 					totalPerPage,
@@ -80,6 +81,7 @@ export class FetchKnowledgeService
 						data: knowledgeResult,
 						page: fetchSolutions.page,
 						total: fetchSolutions.total,
+						totalPage: fetchSolutions.totalPage,
 						totalPerPage: fetchSolutions.totalPerPage,
 					},
 				});
@@ -96,6 +98,7 @@ export class FetchKnowledgeService
 					data: dataFiltering,
 					page: fetchSolutions.page,
 					total: fetchSolutions.total,
+					totalPage: fetchSolutions.totalPage,
 					totalPerPage: fetchSolutions.totalPerPage,
 				},
 			});
