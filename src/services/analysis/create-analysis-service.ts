@@ -41,6 +41,7 @@ export class CreateAnalysisService
 				createdBy: "Suporte Lusati",
 				isActive: true,
 				tags,
+				views: 0,
 			});
 		} catch (error) {
 			console.error(error);

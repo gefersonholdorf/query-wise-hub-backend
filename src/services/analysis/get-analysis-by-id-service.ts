@@ -21,6 +21,12 @@ export type GetAnalysisByIdServiceResponse = Either<
 			createdBy: string;
 			tags: string | null;
 			status: "PENDING" | "APPROVED" | "DENIED";
+			approvedBy: string | null
+			approvedAt: Date | null
+			deniedAt: Date | null
+			deniedBy: string | null
+			observation: string | null
+			updatedAt: Date
 		};
 	}
 >;
@@ -48,7 +54,7 @@ export class GetAnalysisByIdService
 				return left(new NotFoundError());
 			}
 
-			const { id, solution, status, createdAt, createdBy, tags } = data;
+			const { id, solution, status, createdAt, createdBy, tags, approvedBy, approvedAt, deniedAt, deniedBy, observation, updatedAt } = data;
 
 			const problems = await this.qdrantRepository.searchBySolutionId(id);
 
@@ -61,6 +67,12 @@ export class GetAnalysisByIdService
 					createdAt,
 					createdBy,
 					tags,
+					approvedAt,
+					approvedBy,
+					deniedAt,
+					deniedBy, 
+					observation, 
+					updatedAt
 				},
 			});
 		} catch (error) {

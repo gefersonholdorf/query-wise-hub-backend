@@ -26,6 +26,7 @@ export const fetchKnowledgeToAnalyzeRoute: FastifyPluginCallbackZod = (app) => {
 								id: z.number(),
 								problems: z.array(z.string()),
 								solution: z.string(),
+								views: z.number(),
 								createdAt: z.date(),
 								createdBy: z.string(),
 								tags: z.string().nullable(),

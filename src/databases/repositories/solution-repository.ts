@@ -33,6 +33,7 @@ export interface SolutionRepository {
 		solutions: FetchSolutions[];
 		total: number;
 		page: number;
+		totalPage: number;
 		totalPerPage: number;
 	}>;
 	getKnowledges(): Promise<{ solutions: FetchSolutions[] }>;

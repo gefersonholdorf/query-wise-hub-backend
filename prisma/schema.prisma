@@ -30,10 +30,19 @@ model solutions {
   deniedBy     String?   @map("denied_by")
   observation  String?
   tags         String?
+  views        Int @default(0)
   isAnalysis   Boolean   @default(false) @map("is_analysis")
   isActive     Boolean   @default(true) @map("is_active")
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt      @map("updated_at")
 
   @@map("solutions")
+}
+
+model stockHistory {
+  id           Int       @id @default(autoincrement())
+  action       String    @db.Text
+  dateAt DateTime  @default(now()) @map("date_at")
+  status       status
+  @@map("stock_history")
 }

@@ -19,6 +19,7 @@ export type FetchKnowledgeServiceResponse = Either<
 				id: number;
 				problems: string[];
 				solution: string;
+				views: number
 				createdAt: Date;
 				createdBy: string;
 				tags: string | null;
@@ -51,7 +52,7 @@ export class FetchKnowledgeService
 
 			const knowledgeResult = await Promise.all(
 				solutions.map(async (item) => {
-					const { id, solution, createdAt, createdBy, tags, status } = item;
+					const { id, solution, createdAt, createdBy, tags, status, views } = item;
 
 					const { data } = await this.qdrantRepository.searchBySolutionId(id);
 
@@ -59,6 +60,7 @@ export class FetchKnowledgeService
 						id,
 						problems: data,
 						solution,
+						views,
 						createdAt,
 						createdBy,
 						tags,

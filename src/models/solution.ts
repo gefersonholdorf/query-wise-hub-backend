@@ -9,6 +9,7 @@ export interface Solution {
 	deniedBy: string | null;
 	observation: string | null;
 	tags: string | null;
+	views: number;
 	isAnalysis: boolean;
 	isActive: boolean;
 	createdAt: Date;

@@ -11,6 +11,7 @@ import { confirmAnalysisRoute } from "./routes/analysis/confirm-analysis-route";
 import { chatRoute } from "./routes/mcp/chat-route";
 import { summaryDashboardRoute } from "./routes/dashboard/summary-dashboard-route";
 import { getAnalysisByIdRoute } from "./routes/analysis/get-analysis-by-id-route";
+import { updateAnalysisRoute } from "./routes/analysis/update-analysis-route";
 
 export function httpCreateRoute(app: FastifyInstance) {
 	app.register(
@@ -27,6 +28,7 @@ export function httpCreateRoute(app: FastifyInstance) {
 			instance.register(summaryAnalysisRoute);
 			instance.register(confirmAnalysisRoute);
 			instance.register(getAnalysisByIdRoute);
+			instance.register(updateAnalysisRoute)
 
 			instance.register(chatRoute);
 

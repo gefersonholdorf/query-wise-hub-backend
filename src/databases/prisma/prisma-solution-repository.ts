@@ -58,6 +58,7 @@ export class PrismaSolutionRepository implements SolutionRepository {
 		solutions: FetchSolutions[];
 		total: number;
 		page: number;
+		totalPage: number;
 		totalPerPage: number;
 	}> {
 		const { page = 1, totalPerPage = 10 } = pagination;
@@ -74,6 +75,8 @@ export class PrismaSolutionRepository implements SolutionRepository {
 			take: totalPerPage,
 			skip: (page - 1) * totalPerPage,
 		});
+
+		const totalPage = solutions.length;
 
 		const total = await prismaClient.solutions.count({
 			where: {
@@ -94,6 +97,7 @@ export class PrismaSolutionRepository implements SolutionRepository {
 				isActive,
 				isAnalysis,
 				observation,
+				views,
 				solution,
 				status,
 				tags,
@@ -108,6 +112,7 @@ export class PrismaSolutionRepository implements SolutionRepository {
 				deniedAt,
 				deniedBy,
 				isActive,
+				views,
 				isAnalysis,
 				observation,
 				solution,
@@ -121,6 +126,7 @@ export class PrismaSolutionRepository implements SolutionRepository {
 			solutions: solutionsFormated,
 			total,
 			page,
+			totalPage,
 			totalPerPage,
 		};
 	}
@@ -147,6 +153,7 @@ export class PrismaSolutionRepository implements SolutionRepository {
 				isActive,
 				isAnalysis,
 				observation,
+				views,
 				solution,
 				status,
 				tags,
@@ -163,6 +170,7 @@ export class PrismaSolutionRepository implements SolutionRepository {
 				isActive,
 				isAnalysis,
 				observation,
+				views,
 				solution,
 				status,
 				tags,
@@ -237,6 +245,7 @@ export class PrismaSolutionRepository implements SolutionRepository {
 				isActive: solution.isActive,
 				isAnalysis: solution.isAnalysis,
 				observation: solution.observation,
+				views: solution.views,
 				solution: solution.solution,
 				status: solution.status,
 				tags: solution.tags,

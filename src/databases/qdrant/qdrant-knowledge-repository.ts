@@ -104,11 +104,27 @@ export class QdrantKnowledgeBase implements KnowledgeBaseRepository {
 		return { data: points };
 	}
 
-	async save() {
-		// const result = await qdrantClient.updateVectors("knowledge_base", {
-		// 	points: {
-		//         [{}]
-		//     }
-		// });
+	async save(data: KnowledgeBase, solutionId: number): Promise<{}> {
+		const result = await qdrantClient.updateVectors("knowledge_base", {
+			points: [data],
+
+		});
+
+		return {}
+	}
+
+	async delete(solutionId: number): Promise<{}> {
+		await qdrantClient.delete("knowledge_base", {
+			filter: {
+				must: [
+					{
+						key: "solutionId",
+						match: { value: solutionId },
+					},
+				],
+			}
+		});
+
+		return {}
 	}
 }

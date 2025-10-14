@@ -21,4 +21,6 @@ export interface KnowledgeBaseRepository {
 	): Promise<{ data: string[] }>;
 	searchBySolutionId(id: number): Promise<{ data: string[] }>;
 	searchMatch(search: number[]): Promise<{ data: KnowledgeBaseResult[] }>;
+	save(data: KnowledgeBase, solutionId: number): Promise<{}>;
+	delete(solutionId: number): Promise<{}>
 }
