@@ -36,6 +36,8 @@ model solutions {
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt      @map("updated_at")
 
+  stockHistories stockHistory[]
+
   @@map("solutions")
 }
 
@@ -43,6 +45,9 @@ model stockHistory {
   id           Int       @id @default(autoincrement())
   action       String    @db.Text
   dateAt DateTime  @default(now()) @map("date_at")
-  status       status
+  status       status?
+  solutionId Int
+  solution   solutions @relation(fields: [solutionId], references: [id])
+
   @@map("stock_history")
 }

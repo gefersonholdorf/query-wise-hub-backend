@@ -1,5 +1,6 @@
 /** biome-ignore-all assist/source/organizeImports: <"explanation"> */
 import { PrismaSolutionRepository } from "../../databases/prisma/prisma-solution-repository";
+import { PrismaStockHistoryRepository } from "../../databases/prisma/prisma-stock-history-repository";
 import { QdrantKnowledgeBase } from "../../databases/qdrant/qdrant-knowledge-repository";
 import { right, type Either } from "../../utils/either";
 import { ollamaEmbeddingService } from "../ollama/ollama-embedding";
@@ -23,6 +24,7 @@ export class CreateAnalysisService
 {
 	analysisRepository = new QdrantKnowledgeBase();
 	solutionRepository = new PrismaSolutionRepository();
+	stockHistoryRepository = new PrismaStockHistoryRepository();
 
 	async execute(
 		request: CreateAnalysisServiceRequest,
@@ -43,6 +45,11 @@ export class CreateAnalysisService
 				tags,
 				views: 0,
 			});
+
+			await this.stockHistoryRepository.create(
+				"Criado por ADMIN",
+				newSolution.solutionId,
+			);
 		} catch (error) {
 			console.error(error);
 			throw new Error("Erro interno.");

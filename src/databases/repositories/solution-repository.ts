@@ -23,6 +23,15 @@ export interface SolutionCardsSummary {
 	total: number;
 }
 
+export interface GetSolutionByIdResponse extends Solution {
+	stockHistory: {
+		id: number;
+		action: string;
+		status: "PENDING" | "APPROVED" | "DENIED" | null;
+		dateAt: Date;
+	}[];
+}
+
 export interface SolutionRepository {
 	create(data: CreateSolution): Promise<{ solutionId: number }>;
 	createAnalysis(data: CreateSolution): Promise<{ solutionId: number }>;
@@ -38,6 +47,6 @@ export interface SolutionRepository {
 	}>;
 	getKnowledges(): Promise<{ solutions: FetchSolutions[] }>;
 	summary(): Promise<{ summary: SolutionCardsSummary }>;
-	getById(id: number): Promise<{ solution: Solution | null }>;
+	getById(id: number): Promise<{ solution: GetSolutionByIdResponse | null }>;
 	save(solution: Solution, id: number): Promise<{}>;
 }

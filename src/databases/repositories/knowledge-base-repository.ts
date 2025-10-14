@@ -1,7 +1,6 @@
 import type {
 	KnowledgeBase,
 	KnowledgeBaseResult,
-	KnowledgeSearchResult,
 } from "../../models/knowledge";
 
 export interface PaginationParams {
@@ -22,5 +21,5 @@ export interface KnowledgeBaseRepository {
 	searchBySolutionId(id: number): Promise<{ data: string[] }>;
 	searchMatch(search: number[]): Promise<{ data: KnowledgeBaseResult[] }>;
 	save(data: KnowledgeBase, solutionId: number): Promise<{}>;
-	delete(solutionId: number): Promise<{}>
+	delete(solutionId: number): Promise<{}>;
 }

@@ -21,12 +21,18 @@ export type GetAnalysisByIdServiceResponse = Either<
 			createdBy: string;
 			tags: string | null;
 			status: "PENDING" | "APPROVED" | "DENIED";
-			approvedBy: string | null
-			approvedAt: Date | null
-			deniedAt: Date | null
-			deniedBy: string | null
-			observation: string | null
-			updatedAt: Date
+			approvedBy: string | null;
+			approvedAt: Date | null;
+			deniedAt: Date | null;
+			deniedBy: string | null;
+			observation: string | null;
+			updatedAt: Date;
+			stockHistory: {
+				id: number;
+				action: string;
+				status: "PENDING" | "APPROVED" | "DENIED" | null;
+				dateAt: Date;
+			}[];
 		};
 	}
 >;
@@ -54,7 +60,21 @@ export class GetAnalysisByIdService
 				return left(new NotFoundError());
 			}
 
-			const { id, solution, status, createdAt, createdBy, tags, approvedBy, approvedAt, deniedAt, deniedBy, observation, updatedAt } = data;
+			const {
+				id,
+				solution,
+				status,
+				createdAt,
+				createdBy,
+				tags,
+				approvedBy,
+				approvedAt,
+				deniedAt,
+				deniedBy,
+				observation,
+				updatedAt,
+				stockHistory,
+			} = data;
 
 			const problems = await this.qdrantRepository.searchBySolutionId(id);
 
@@ -70,9 +90,10 @@ export class GetAnalysisByIdService
 					approvedAt,
 					approvedBy,
 					deniedAt,
-					deniedBy, 
-					observation, 
-					updatedAt
+					deniedBy,
+					observation,
+					updatedAt,
+					stockHistory,
 				},
 			});
 		} catch (error) {

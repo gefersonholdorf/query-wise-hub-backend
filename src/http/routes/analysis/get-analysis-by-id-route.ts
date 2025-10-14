@@ -40,7 +40,15 @@ export const getAnalysisByIdRoute: FastifyPluginCallbackZod = (app) => {
 						deniedAt: z.date().nullable(),
 						deniedBy: z.string().nullable(),
 						observation: z.string().nullable(),
-						updatedAt: z.date()
+						updatedAt: z.date(),
+						stockHistory: z.array(
+							z.object({
+								id: z.number(),
+								action: z.string(),
+								status: z.enum(["PENDING", "APPROVED", "DENIED"]).nullable(),
+								dateAt: z.date(),
+							}),
+						),
 					}),
 					404: z.object({
 						message: z.string(),
@@ -76,7 +84,8 @@ export const getAnalysisByIdRoute: FastifyPluginCallbackZod = (app) => {
 				deniedAt: result.deniedAt,
 				deniedBy: result.deniedBy,
 				observation: result.observation,
-				updatedAt: result.updatedAt
+				updatedAt: result.updatedAt,
+				stockHistory: result.stockHistory,
 			});
 		},
 	);

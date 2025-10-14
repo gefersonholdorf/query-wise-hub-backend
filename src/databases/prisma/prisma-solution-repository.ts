@@ -7,6 +7,7 @@ import type {
 import { prismaClient } from "../client";
 import type {
 	FilteringParams,
+	GetSolutionByIdResponse,
 	PaginationParams,
 	SolutionCardsSummary,
 	SolutionRepository,
@@ -220,7 +221,9 @@ export class PrismaSolutionRepository implements SolutionRepository {
 		};
 	}
 
-	async getById(id: number): Promise<{ solution: Solution | null }> {
+	async getById(
+		id: number,
+	): Promise<{ solution: GetSolutionByIdResponse | null }> {
 		const solution = await prismaClient.solutions.findUnique({
 			where: {
 				id,
@@ -232,6 +235,15 @@ export class PrismaSolutionRepository implements SolutionRepository {
 				solution: null,
 			};
 		}
+
+		const stockHistory = await prismaClient.stockHistory.findMany({
+			where: {
+				solutionId: id,
+			},
+			orderBy: {
+				id: "desc",
+			},
+		});
 
 		return {
 			solution: {
@@ -250,6 +262,7 @@ export class PrismaSolutionRepository implements SolutionRepository {
 				status: solution.status,
 				tags: solution.tags,
 				updatedAt: solution.updatedAt,
+				stockHistory: stockHistory,
 			},
 		};
 	}

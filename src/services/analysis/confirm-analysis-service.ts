@@ -1,6 +1,7 @@
 /** biome-ignore-all assist/source/organizeImports: <"explanation"> */
 /** biome-ignore-all lint/complexity/noBannedTypes: <"explanation"> */
 import { PrismaSolutionRepository } from "../../databases/prisma/prisma-solution-repository";
+import { PrismaStockHistoryRepository } from "../../databases/prisma/prisma-stock-history-repository";
 import { NotFoundError } from "../../errors/not-found-error";
 import { left, right, type Either } from "../../utils/either";
 import type { Service } from "../service";
@@ -18,6 +19,7 @@ export class ConfirmAnalysisService
 		Service<ConfirmAnalysisServiceRequest, ConfirmAnalysisServiceResponse>
 {
 	solutionRepository = new PrismaSolutionRepository();
+	stockHistoryRepository = new PrismaStockHistoryRepository();
 
 	async execute(
 		request: ConfirmAnalysisServiceRequest,
@@ -47,6 +49,12 @@ export class ConfirmAnalysisService
 			}
 
 			await this.solutionRepository.save(solution, id);
+
+			await this.stockHistoryRepository.create(
+				"Análise revisada por ADMIN",
+				id,
+				status,
+			);
 
 			return right({});
 		} catch (error) {
