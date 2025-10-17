@@ -32,7 +32,8 @@ export const fetchAnalysisRoute: FastifyPluginCallbackZod = (app) => {
 							}),
 						),
 						total: z.number(),
-						totalPage: z.number(),
+						pageSize: z.number(),
+						totalPages: z.number(),
 						page: z.number(),
 						totalPerPage: z.number(),
 					}),
@@ -58,7 +59,8 @@ export const fetchAnalysisRoute: FastifyPluginCallbackZod = (app) => {
 			return reply.status(200).send({
 				data: result.data,
 				total: result.total,
-				totalPage: result.totalPage,
+				pageSize: result.pageSize,
+				totalPages: result.totalPages,
 				page: result.page,
 				totalPerPage: result.totalPerPage,
 			});

@@ -59,7 +59,8 @@ export class PrismaSolutionRepository implements SolutionRepository {
 		solutions: FetchSolutions[];
 		total: number;
 		page: number;
-		totalPage: number;
+		pageSize: number;
+		totalPages: number;
 		totalPerPage: number;
 	}> {
 		const { page = 1, totalPerPage = 10 } = pagination;
@@ -77,7 +78,7 @@ export class PrismaSolutionRepository implements SolutionRepository {
 			skip: (page - 1) * totalPerPage,
 		});
 
-		const totalPage = solutions.length;
+		const pageSize = solutions.length;
 
 		const total = await prismaClient.solutions.count({
 			where: {
@@ -85,6 +86,8 @@ export class PrismaSolutionRepository implements SolutionRepository {
 				status: status ?? undefined,
 			},
 		});
+
+		const totalPages = Math.ceil(total / totalPerPage);
 
 		const solutionsFormated: FetchSolutions[] = solutions.map((item) => {
 			const {
@@ -127,7 +130,8 @@ export class PrismaSolutionRepository implements SolutionRepository {
 			solutions: solutionsFormated,
 			total,
 			page,
-			totalPage,
+			pageSize,
+			totalPages,
 			totalPerPage,
 		};
 	}

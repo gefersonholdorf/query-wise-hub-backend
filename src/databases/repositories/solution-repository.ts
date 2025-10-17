@@ -42,7 +42,8 @@ export interface SolutionRepository {
 		solutions: FetchSolutions[];
 		total: number;
 		page: number;
-		totalPage: number;
+		pageSize: number;
+		totalPages: number;
 		totalPerPage: number;
 	}>;
 	getKnowledges(): Promise<{ solutions: FetchSolutions[] }>;

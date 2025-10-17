@@ -25,7 +25,8 @@ export type FetchAnalysisServiceResponse = Either<
 			}[];
 			total: number;
 			page: number;
-			totalPage: number;
+			pageSize: number;
+			totalPages: number;
 			totalPerPage: number;
 		};
 	}
@@ -78,7 +79,8 @@ export class FetchAnalysisService
 					data: knowledgeResult,
 					page: fetchSolutions.page,
 					total: fetchSolutions.total,
-					totalPage: fetchSolutions.totalPage,
+					pageSize: fetchSolutions.pageSize,
+					totalPages: fetchSolutions.totalPages,
 					totalPerPage: fetchSolutions.totalPerPage,
 				},
 			});
