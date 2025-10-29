@@ -1,4 +1,6 @@
+/** biome-ignore-all assist/source/organizeImports: <"explanation"> */
 import fastifySwagger from "@fastify/swagger";
+import fastifyJwt from "@fastify/jwt";
 import fastifyApiReference from "@scalar/fastify-api-reference";
 import fastify from "fastify";
 import {
@@ -37,6 +39,10 @@ app.register(fastifySwagger, {
 
 app.register(fastifyApiReference, {
 	routePrefix: "/docs",
+});
+
+app.register(fastifyJwt, {
+	secret: env.SECRET_KEY,
 });
 
 app.register(httpCreateRoute);
