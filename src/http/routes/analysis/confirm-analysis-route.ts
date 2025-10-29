@@ -13,7 +13,7 @@ export const confirmAnalysisRoute: FastifyPluginCallbackZod = (app) => {
 			schema: {
 				tags: ["Analysis"],
 				summary: "Confirm Analysys",
-				description: "Approve or deny analysis",
+				description: "Confirms an existing analysis.",
 				body: z.object({
 					status: z.enum(["APPROVED", "DENIED"]),
 					observation: z.string().optional(),

@@ -22,7 +22,7 @@ export const getAnalysisByIdRoute: FastifyPluginCallbackZod = (app) => {
 			schema: {
 				tags: ["Analysis"],
 				summary: "Get Analysys By Id",
-				description: "Get analysis by id",
+				description: "Retrieves a specific analysis by its ID.",
 				params: z.object({
 					id: z.coerce.number(),
 				}),

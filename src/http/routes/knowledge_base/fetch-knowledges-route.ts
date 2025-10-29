@@ -13,7 +13,7 @@ export const fetchKnowledgeToAnalyzeRoute: FastifyPluginCallbackZod = (app) => {
 				tags: ["Knowledge"],
 				summary: "Fetch knowledges",
 				description:
-					"Este endpoint permite criar um novo conhecimento através de curadoria. É necessário informar os dados obrigatórios (problema, solução).",
+					"Retrieves a list of all knowledge entries.",
 				querystring: z.object({
 					page: z.coerce.number().optional(),
 					totalPerPage: z.coerce.number().optional(),

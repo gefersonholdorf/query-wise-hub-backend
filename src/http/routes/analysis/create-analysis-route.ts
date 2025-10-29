@@ -12,7 +12,7 @@ export const createAnalysisRoute: FastifyPluginCallbackZod = (app) => {
 			schema: {
 				tags: ["Analysis"],
 				summary: "Create Analysys",
-				description: "Create Analysis from a chat",
+				description: "Creates a new analysis.",
 				body: z.object({
 					problem: z.string(),
 					solution: z.string(),

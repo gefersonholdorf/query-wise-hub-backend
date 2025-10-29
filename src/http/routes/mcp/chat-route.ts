@@ -9,7 +9,7 @@ export const chatRoute: FastifyPluginAsyncZod = async (app) => {
 			schema: {
 				summary: "Send a chat message",
 				description:
-					"Use this route to send a user message to the chat system.",
+					"Sends a message in the chat.",
 				tags: ["Chat"],
 				body: z.object({
 					message: z.string().min(1, "A mensagem não pode ser vazia."),

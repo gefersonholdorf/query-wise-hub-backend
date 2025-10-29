@@ -12,7 +12,7 @@ export const fetchAnalysisRoute: FastifyPluginCallbackZod = (app) => {
 			schema: {
 				tags: ["Analysis"],
 				summary: "Fetch Analysys",
-				description: "Fetch solutions by isAnalysis is true",
+				description: "Retrieves a list of all analyses.",
 				querystring: z.object({
 					page: z.coerce.number().optional(),
 					totalPerPage: z.coerce.number().optional(),

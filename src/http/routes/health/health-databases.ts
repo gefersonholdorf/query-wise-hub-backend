@@ -9,8 +9,8 @@ export const healthDBRoute: FastifyPluginCallbackZod = (app) => {
 		{
 			schema: {
 				tags: ["Health"],
-				summary: "Verifica a saúde da aplicação.",
-				description: "Responsável por verificar se a API esta UP.",
+				summary: "Database Health Check",
+				description: "Verifies the health status of the databases.",
 				response: {
 					200: z.object({
 						mysql: z.boolean(),

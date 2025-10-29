@@ -12,7 +12,7 @@ export const createKnowledgeRoute: FastifyPluginCallbackZod = (app) => {
 			schema: {
 				tags: ["Knowledge"],
 				summary: "Create knowledge",
-				description: "Create knowledge",
+				description: "Creates a new knowledge entry.",
 				body: z.object({
 					problems: z.array(z.string()),
 					solution: z.string(),

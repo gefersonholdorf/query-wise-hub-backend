@@ -36,7 +36,7 @@ export class PrismaSolutionRepository implements SolutionRepository {
 	async createAnalysis(data: CreateSolution): Promise<{ solutionId: number }> {
 		const { solution, createdBy, tags, isActive } = data;
 
-		const newSolution = await prismaClient.solutions.create({
+		const newSolution = await prismaClient.knowledge.create({
 			data: {
 				solution,
 				createdBy,

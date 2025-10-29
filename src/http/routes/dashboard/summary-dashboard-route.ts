@@ -17,7 +17,7 @@ export const summaryDashboardRoute: FastifyPluginCallbackZod = (app) => {
 			schema: {
 				tags: ["Dashboard"],
 				summary: "Summary Dashboard",
-				description: "Summary dashboard all",
+				description: "Retrieves a summary of dashboard.",
 				response: {
 					200: z.object({
 						totalKnowledges: z.number(),

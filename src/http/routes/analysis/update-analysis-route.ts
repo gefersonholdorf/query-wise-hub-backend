@@ -24,7 +24,7 @@ export const updateAnalysisRoute: FastifyPluginCallbackZod = (app) => {
 			schema: {
 				tags: ["Analysis"],
 				summary: "Update Analysys",
-				description: "Update Analysis",
+				description: "Updates an existing analysis.",
 				body: z.object({
 					problems: z.array(z.string()),
 					solution: z.string(),

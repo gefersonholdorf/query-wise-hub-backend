@@ -12,7 +12,7 @@ export const summaryAnalysisRoute: FastifyPluginCallbackZod = (app) => {
 			schema: {
 				tags: ["Analysis"],
 				summary: "Summary Analysis",
-				description: "Quantitative summaries by isAnalysis are true",
+				description: "Retrieves a summary of analyses.",
 				response: {
 					200: z.object({
 						totalPendings: z.number(),
