@@ -1,120 +1,131 @@
-// /** biome-ignore-all assist/source/organizeImports: <"explanation"> */
-// /** biome-ignore-all lint/complexity/useOptionalChain: <"explanation"> */
-// import { PrismaSolutionRepository } from "../../databases/prisma/prisma-solution-repository";
-// import { QdrantKnowledgeBase } from "../../databases/qdrant/qdrant-knowledge-repository";
-// import { right, type Either } from "../../utils/either";
-// import type { Service } from "../service";
+/** biome-ignore-all assist/source/organizeImports: <"explanation"> */
+/** biome-ignore-all lint/complexity/useOptionalChain: <"explanation"> */
+import type { PrismaKnowledgeRepository } from "../../databases/prisma/prisma-knowledge-repository";
+import type { QdrantProblemsRepository } from "../../databases/qdrant/qdrant-problems-repository";
+import { left, right, type Either } from "../../utils/either";
+import type { Service } from "../service";
 
-// export interface FetchKnowledgeServiceRequest {
-// 	page?: number;
-// 	totalPerPage?: number;
-// 	problem?: string;
-// }
+export interface FetchKnowledgeServiceRequest {
+	page?: number;
+	totalPerPage?: number;
+	problem?: string;
+}
 
-// export type FetchKnowledgeServiceResponse = Either<
-// 	never,
-// 	{
-// 		result: {
-// 			data: {
-// 				id: number;
-// 				problems: string[];
-// 				solution: string;
-// 				views: number
-// 				createdAt: Date;
-// 				createdBy: string;
-// 				tags: string | null;
-// 				status: "PENDING" | "APPROVED" | "DENIED";
-// 			}[];
-// 			total: number;
-// 			totalPage: number;
-// 			page: number;
-// 			totalPerPage: number;
-// 		};
-// 	}
-// >;
+export type FetchKnowledgeServiceResponse = Either<
+	Error,
+	{
+		result: {
+			data: {
+				id: number;
+				title: string;
+				problems: string[];
+				solution: string;
+				views: number;
+				createdAt: Date;
+				createdById: number;
+				tags: string | null;
+				status: "PENDING" | "APPROVED" | "DENIED";
+			}[];
+			page: number;
+			perPage: number;
+			total: number;
+			totalPages: number;
+		};
+	}
+>;
 
-// export class FetchKnowledgeService
-// 	implements
-// 		Service<FetchKnowledgeServiceRequest, FetchKnowledgeServiceResponse>
-// {
-// 	qdrantRepository = new QdrantKnowledgeBase();
-// 	solutionRepository = new PrismaSolutionRepository();
+export class FetchKnowledgeService
+	implements
+		Service<FetchKnowledgeServiceRequest, FetchKnowledgeServiceResponse>
+{
+	constructor(
+		private readonly problemsRepository: QdrantProblemsRepository,
+		private readonly knowledgeRepository: PrismaKnowledgeRepository,
+	) {}
 
-// 	async execute(
-// 		request: FetchKnowledgeServiceRequest,
-// 	): Promise<FetchKnowledgeServiceResponse> {
-// 		const { problem, page = 1, totalPerPage = 9 } = request;
+	async execute(
+		request: FetchKnowledgeServiceRequest,
+	): Promise<FetchKnowledgeServiceResponse> {
+		const { problem, page = 1, totalPerPage = 9 } = request;
 
-// 		try {
-// 			const fetchSolutions = await this.solutionRepository.getKnowledges();
+		try {
+			const fetchKnowledge = await this.knowledgeRepository.getKnowledges();
 
-// 			const { solutions } = fetchSolutions;
+			const { knowledge } = fetchKnowledge;
 
-// 			const knowledgeResult = await Promise.all(
-// 				solutions.map(async (item) => {
-// 					const { id, solution, createdAt, createdBy, tags, status, views } = item;
+			const knowledgeResult = await Promise.all(
+				knowledge.map(async (item) => {
+					const {
+						id,
+						title,
+						solution,
+						createdAt,
+						createdById,
+						tags,
+						status,
+						views,
+					} = item;
 
-// 					const { data } = await this.qdrantRepository.searchBySolutionId(id);
+					const { data } =
+						await this.problemsRepository.searchByKnowledgeId(id);
 
-// 					return {
-// 						id,
-// 						problems: data,
-// 						solution,
-// 						views,
-// 						createdAt,
-// 						createdBy,
-// 						tags,
-// 						status,
-// 					};
-// 				}),
-// 			);
+					return {
+						id,
+						title,
+						problems: data,
+						solution,
+						views,
+						createdAt,
+						createdById,
+						tags,
+						status,
+					};
+				}),
+			);
 
-// 			if (!problem) {
-// 				const totalItems = knowledgeResult.length;
+			if (!problem) {
+				const totalItems = knowledgeResult.length;
 
-// 				const startIndex = (page - 1) * totalPerPage;
-// 				const endIndex = startIndex + totalPerPage;
+				const startIndex = (page - 1) * totalPerPage;
+				const endIndex = startIndex + totalPerPage;
 
-// 				const paginatedData = knowledgeResult.slice(startIndex, endIndex);
+				const paginatedData = knowledgeResult.slice(startIndex, endIndex);
 
-// 				return right({
-// 					result: {
-// 						data: paginatedData,
-// 						page: page,
-// 						total: totalItems,
-// 						totalPage: paginatedData.length,
-// 						totalPerPage: totalPerPage,
-// 					},
-// 				});
-// 			}
+				return right({
+					result: {
+						data: paginatedData,
+						page: page,
+						total: totalItems,
+						totalPages: Math.ceil(totalItems / totalPerPage),
+						perPage: totalPerPage,
+					},
+				});
+			}
 
-// 			const dataFiltering = knowledgeResult.filter((item) => {
-// 				const firstProblem = item.problems[0];
-// 				return (
-// 					firstProblem &&
-// 					firstProblem.toLowerCase().includes(problem.toLowerCase())
-// 				);
-// 			});
+			const dataFiltering = knowledgeResult.filter((item) => {
+				const title = item.title;
+				return title && title.toLowerCase().includes(problem.toLowerCase());
+			});
 
-// 			const totalItems = dataFiltering.length;
+			const totalItems = dataFiltering.length;
 
-// 			const startIndex = (page - 1) * totalPerPage;
-// 			const endIndex = startIndex + totalPerPage;
+			const startIndex = 0;
+			const endIndex = startIndex + totalPerPage;
 
-// 			const paginatedData = knowledgeResult.slice(startIndex, endIndex);
+			const paginatedData = dataFiltering.slice(startIndex, endIndex);
 
-// 			return right({
-// 				result: {
-// 					data: paginatedData,
-// 					page: page,
-// 					total: totalItems,
-// 					totalPage: paginatedData.length,
-// 					totalPerPage: totalPerPage,
-// 				},
-// 			});
-// 		} catch (error) {
-// 			console.error(error);
-// 			throw new Error("Erro interno.");
-// 		}
-// 	}
-// }
+			return right({
+				result: {
+					data: paginatedData,
+					page: page,
+					total: totalItems,
+					totalPages: Math.ceil(totalItems / totalPerPage),
+					perPage: totalPerPage,
+				},
+			});
+		} catch (error) {
+			console.error(error);
+			return left(new Error("Error fetching knowledge"));
+		}
+	}
+}

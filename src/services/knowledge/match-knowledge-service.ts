@@ -1,78 +1,83 @@
-// /** biome-ignore-all assist/source/organizeImports: <"explanation"> */
-// import { PrismaSolutionRepository } from "../../databases/prisma/prisma-solution-repository";
-// import { QdrantKnowledgeBase } from "../../databases/qdrant/qdrant-knowledge-repository";
-// import { right, type Either } from "../../utils/either";
-// import { ollamaEmbeddingService } from "../ollama/ollama-embedding";
-// import type { Service } from "../service";
+/** biome-ignore-all assist/source/organizeImports: <"explanation"> */
+import type { PrismaKnowledgeRepository } from "../../databases/prisma/prisma-knowledge-repository";
+import type { QdrantProblemsRepository } from "../../databases/qdrant/qdrant-problems-repository";
+import { left, right, type Either } from "../../utils/either";
+import { ollamaEmbeddingService } from "../ollama/ollama-embedding";
+import type { Service } from "../service";
 
-// export interface MatchKnowledgeServiceResponseResult {
-// 	matchs: {
-// 		id: string;
-// 		version: number;
-// 		score: number;
-// 		problem: string;
-// 		solution: {
-// 			solutionId: number;
-// 			solution: string;
-// 		};
-// 	}[];
-// }
+export interface MatchKnowledgeServiceResponseResult {
+	matchs: ({
+		id: string;
+		version: number;
+		score: number;
+		problem: string;
+		knowledge: {
+			knowledgeId: number;
+			knowledge: string;
+		};
+	} | null)[];
+}
 
-// export interface MatchKnowledgeServiceRequest {
-// 	message: string;
-// }
+export interface MatchKnowledgeServiceRequest {
+	message: string;
+}
 
-// export type MatchKnowledgeServiceResponse = Either<
-// 	never,
-// 	MatchKnowledgeServiceResponseResult
-// >;
+export type MatchKnowledgeServiceResponse = Either<
+	Error,
+	MatchKnowledgeServiceResponseResult
+>;
 
-// export class MatchKnowledgeService
-// 	implements
-// 		Service<MatchKnowledgeServiceRequest, MatchKnowledgeServiceResponse>
-// {
-// 	knowledgeRepository = new QdrantKnowledgeBase();
-// 	solutionRepository = new PrismaSolutionRepository();
+export class MatchKnowledgeService
+	implements
+		Service<MatchKnowledgeServiceRequest, MatchKnowledgeServiceResponse>
+{
+	constructor(
+		private readonly problemsRepository: QdrantProblemsRepository,
+		private readonly knowledgeRepository: PrismaKnowledgeRepository,
+	) {}
 
-// 	async execute(
-// 		request: MatchKnowledgeServiceRequest,
-// 	): Promise<MatchKnowledgeServiceResponse> {
-// 		const { message } = request;
+	async execute(
+		request: MatchKnowledgeServiceRequest,
+	): Promise<MatchKnowledgeServiceResponse> {
+		const { message } = request;
 
-// 		const embedding = await ollamaEmbeddingService(message);
+		const embedding = await ollamaEmbeddingService(message);
 
-// 		try {
-// 			const result = await this.knowledgeRepository.searchMatch(embedding);
+		try {
+			const result = await this.problemsRepository.searchMatch(embedding);
 
-// 			const response = result.data
-// 				.filter((item) => item.score >= 0.7)
-// 				.sort((a, b) => b.score - a.score);
+			const response = result.data
+				.filter((item) => item.score >= 0.7)
+				.sort((a, b) => b.score - a.score);
 
-// 			return right({
-// 				matchs: await Promise.all(
-// 					response.map(async (item) => {
-// 						const solution = await this.solutionRepository.getById(
-// 							item.payload.solutionId,
-// 						);
-// 						return {
-// 							id: item.id,
-// 							version: item.version,
-// 							score: item.score,
-// 							problem: item.payload.problem,
-// 							solution: {
-// 								solutionId: solution.solution?.id || 0,
-// 								solution: solution.solution?.solution || "",
-// 							},
-// 						};
-// 					}),
-// 				),
-// 			});
-// 		} catch (error) {
-// 			console.error(error);
-// 		}
+			return right({
+				matchs: await Promise.all(
+					response.map(async (item) => {
+						const knowledge = await this.knowledgeRepository.getById(
+							item.payload.knowledgeId,
+						);
 
-// 		return right({
-// 			matchs: [],
-// 		});
-// 	}
-// }
+						if (!knowledge.knowledge) {
+							return null;
+						}
+
+						const { knowledge: knowledgeDetail } = knowledge;
+						return {
+							id: item.id,
+							version: item.version,
+							score: item.score,
+							problem: item.payload.problem,
+							knowledge: {
+								knowledgeId: knowledgeDetail.id,
+								knowledge: knowledgeDetail.title,
+							},
+						};
+					}),
+				),
+			});
+		} catch (error) {
+			console.error(error);
+			return left(new Error("Internal error."));
+		}
+	}
+}

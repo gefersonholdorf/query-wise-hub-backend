@@ -6,6 +6,7 @@ import { PrismaUserRepository } from "../../../databases/prisma/prisma-user-repo
 import { authenticate } from "../../../decorators/authenticate";
 import { PrismaSessionRepository } from "../../../databases/prisma/prisma-session-repository";
 import { MeService } from "../../../services/users/me-service";
+import { NotFoundError } from "../../../errors/not-found-error";
 
 const prismaUserRepository = new PrismaUserRepository();
 const prismaSessionRepository = new PrismaSessionRepository();
@@ -13,7 +14,7 @@ const prismaSessionRepository = new PrismaSessionRepository();
 export const meRoute: FastifyPluginCallbackZod = (app) => {
 	const meService = new MeService(prismaUserRepository);
 
-	app.post(
+	app.get(
 		"/users/me",
 		{
 			preHandler: [authenticate(app, prismaSessionRepository)],
@@ -55,7 +56,7 @@ export const meRoute: FastifyPluginCallbackZod = (app) => {
 			});
 
 			if (serviceResponse.isLeft()) {
-				if (serviceResponse.value instanceof EntityAlreadyExistsError) {
+				if (serviceResponse.value instanceof NotFoundError) {
 					return reply
 						.status(404)
 						.send({ message: serviceResponse.value.message });
