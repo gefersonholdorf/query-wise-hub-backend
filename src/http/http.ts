@@ -4,6 +4,7 @@ import { healthDBRoute } from "./routes/health/health-databases";
 import { createUserRoute } from "./routes/users/create-user-route";
 import { loginRoute } from "./routes/auth/login-route";
 import { logoutRoute } from "./routes/auth/logout-route";
+import { meRoute } from "./routes/users/me-user-route";
 // import { createKnowledgeRoute } from "./routes/knowledge_base/create-knowledge-route";
 // import { matchKnowledgeRoute } from "./routes/knowledge_base/match-knowledge-route";
 // import { fetchKnowledgeToAnalyzeRoute } from "./routes/knowledge_base/fetch-knowledges-route";
@@ -23,6 +24,7 @@ export function httpCreateRoute(app: FastifyInstance) {
 			instance.register(healthDBRoute);
 
 			instance.register(createUserRoute);
+			instance.register(meRoute)
 
 			instance.register(loginRoute);
 			instance.register(logoutRoute);

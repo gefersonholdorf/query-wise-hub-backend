@@ -32,6 +32,17 @@ app.register(fastifySwagger, {
 			description: "Documentação oficial da aplicação QueryWiseHub",
 			version: "1.0.0",
 		},
+		components: {
+			securitySchemes: {
+				BearerAuth: {
+					type: "http",
+					scheme: "bearer",
+					bearerFormat: "JWT",
+					description: "Enter your token.",
+				},
+			},
+		},
+		security: [],
 	},
 	transform: jsonSchemaTransform,
 	transformObject: jsonSchemaTransformObject,

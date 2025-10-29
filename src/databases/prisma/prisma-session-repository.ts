@@ -20,10 +20,10 @@ export class PrismaSessionRepository implements SessionRepository {
 		});
 	}
 
-	async invalidateSession(token: string): Promise<void> {
-		await prismaClient.session.update({
+	async invalidateSession(userId: number): Promise<void> {
+		await prismaClient.session.updateMany({
 			where: {
-				token,
+				userId,
 			},
 			data: {
 				isActive: false,

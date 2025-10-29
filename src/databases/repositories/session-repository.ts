@@ -8,6 +8,6 @@ export interface CreateSessionDTO {
 
 export interface SessionRepository {
 	createSession(data: CreateSessionDTO): Promise<void>;
-	invalidateSession(token: string): Promise<void>;
+	invalidateSession(userId: number): Promise<void>;
 	isSessionValid(token: string): Promise<boolean>;
 }

@@ -8,4 +8,5 @@ export interface UserRepository {
 		username?: string,
 	): Promise<{ user: User | null }>;
 	lastLogin(userId: number): Promise<void>;
+	findById(userId: number): Promise<{ user: User | null }>;
 }

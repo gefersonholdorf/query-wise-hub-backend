@@ -49,8 +49,6 @@ export class LoginService
 				existingUser.user.passwordHash,
 			);
 
-			console.log(isPasswordValid);
-
 			if (!isPasswordValid) {
 				return left(new CredentialsInvalidError("Credentials invalid"));
 			}
