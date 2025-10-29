@@ -109,7 +109,7 @@ export class FetchKnowledgeService
 
 			const totalItems = dataFiltering.length;
 
-			const startIndex = 0;
+			const startIndex = (page - 1) * totalPerPage;
 			const endIndex = startIndex + totalPerPage;
 
 			const paginatedData = dataFiltering.slice(startIndex, endIndex);

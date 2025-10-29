@@ -29,7 +29,7 @@ app.register(fastifySwagger, {
 		openapi: "3.0.0",
 		info: {
 			title: "QueryWise",
-			description: "Documentação oficial da aplicação QueryWiseHub",
+			description: "Official documentation for the QueryWiseHub application.",
 			version: "1.0.0",
 		},
 		components: {

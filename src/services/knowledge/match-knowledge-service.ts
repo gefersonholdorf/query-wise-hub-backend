@@ -13,7 +13,7 @@ export interface MatchKnowledgeServiceResponseResult {
 		problem: string;
 		knowledge: {
 			knowledgeId: number;
-			knowledge: string;
+			solution: string;
 		};
 	} | null)[];
 }
@@ -69,7 +69,7 @@ export class MatchKnowledgeService
 							problem: item.payload.problem,
 							knowledge: {
 								knowledgeId: knowledgeDetail.id,
-								knowledge: knowledgeDetail.title,
+								solution: knowledgeDetail.solution,
 							},
 						};
 					}),

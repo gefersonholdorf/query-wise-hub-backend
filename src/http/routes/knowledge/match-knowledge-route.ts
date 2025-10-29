@@ -39,7 +39,7 @@ export const matchKnowledgeRoute: FastifyPluginCallbackZod = (app) => {
 									problem: z.string(),
 									knowledge: z.object({
 										knowledgeId: z.number(),
-										knowledge: z.string(),
+										solution: z.string(),
 									}),
 								})
 								.nullable(),
@@ -76,7 +76,7 @@ export const matchKnowledgeRoute: FastifyPluginCallbackZod = (app) => {
 						problem: item.problem,
 						knowledge: {
 							knowledgeId: item.knowledge.knowledgeId,
-							knowledge: item.knowledge.knowledge,
+							solution: item.knowledge.solution,
 						},
 					};
 				}),
