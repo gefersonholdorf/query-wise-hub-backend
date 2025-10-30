@@ -1,6 +1,6 @@
 export interface StockHistoryRepository {
 	create(
 		action: string,
-		solutionId: number,
+		knowledgeId: number,
 	): Promise<{ stockHistoryId: number }>;
 }

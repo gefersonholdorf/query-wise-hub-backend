@@ -97,19 +97,19 @@ export class QdrantProblemsRepository implements ProblemsRepository {
 		return { data: points };
 	}
 
-	async save(data: Problem, knowledgeId: number): Promise<void> {
-		await qdrantClient.updateVectors("problems", {
-			points: [data],
-		});
-	}
+	// async save(data: Problem, knowledgeId: number): Promise<void> {
+	// 	await qdrantClient.updateVectors("problems", {
+	// 		points: [data],
+	// 	});
+	// }
 
-	async delete(solutionId: number): Promise<void> {
+	async delete(knowledgeId: number): Promise<void> {
 		await qdrantClient.delete("problems", {
 			filter: {
 				must: [
 					{
-						key: "solutionId",
-						match: { value: solutionId },
+						key: "knowledgeId",
+						match: { value: knowledgeId },
 					},
 				],
 			},

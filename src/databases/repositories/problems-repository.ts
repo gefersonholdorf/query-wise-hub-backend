@@ -17,6 +17,6 @@ export interface ProblemsRepository {
 	): Promise<{ data: string[] }>;
 	searchByKnowledgeId(id: number): Promise<{ data: string[] }>;
 	searchMatch(search: number[]): Promise<{ data: ProblemResult[] }>;
-	save(data: Problem, knowledgeId: number): Promise<void>;
-	delete(problemId: number): Promise<void>;
+	// save(data: Problem, knowledgeId: number): Promise<void>;
+	delete(knowledgeId: number): Promise<void>;
 }

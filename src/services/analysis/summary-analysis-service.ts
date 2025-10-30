@@ -1,49 +1,51 @@
-// /** biome-ignore-all assist/source/organizeImports: <"explanation"> */
-// import { PrismaSolutionRepository } from "../../databases/prisma/prisma-solution-repository";
-// import { right, type Either } from "../../utils/either";
-// import type { Service } from "../service";
+/** biome-ignore-all assist/source/organizeImports: <"explanation"> */
+import type { PrismaKnowledgeRepository } from "../../databases/prisma/prisma-knowledge-repository";
+import { left, right, type Either } from "../../utils/either";
+import type { Service } from "../service";
 
-// export type SummaryAnalysisServiceResponse = Either<
-// 	never,
-// 	{
-// 		result: {
-// 			totalPendings: number;
-// 			totalApproveds: number;
-// 			totalDenieds: number;
-// 			total: number;
-// 			approvalRate: number;
-// 		};
-// 	}
-// >;
+export type SummaryAnalysisServiceResponse = Either<
+	Error,
+	{
+		result: {
+			totalPendings: number;
+			totalApproveds: number;
+			totalDenieds: number;
+			total: number;
+			approvalRate: number;
+		};
+	}
+>;
 
-// export class SummaryAnalysisService
-// 	implements Service<never, SummaryAnalysisServiceResponse>
-// {
-// 	solutionRepository = new PrismaSolutionRepository();
+export class SummaryAnalysisService
+	implements Service<never, SummaryAnalysisServiceResponse>
+{
+	constructor(
+		private readonly knowledgeRepository: PrismaKnowledgeRepository,
+	) {}
 
-// 	async execute(): Promise<SummaryAnalysisServiceResponse> {
-// 		try {
-// 			const summaryAnalysis = await this.solutionRepository.summary();
+	async execute(): Promise<SummaryAnalysisServiceResponse> {
+		try {
+			const summaryAnalysis = await this.knowledgeRepository.summary();
 
-// 			const { total, totalApproveds, totalDenieds, totalPendings } =
-// 				summaryAnalysis.summary;
+			const { total, totalApproveds, totalDenieds, totalPendings } =
+				summaryAnalysis.summary;
 
-// 			const approvalRate = Math.ceil(
-// 				(totalApproveds / (totalApproveds + totalDenieds)) * 100,
-// 			);
+			const approvalRate = Math.ceil(
+				(totalApproveds / (totalApproveds + totalDenieds)) * 100,
+			);
 
-// 			return right({
-// 				result: {
-// 					totalPendings,
-// 					totalApproveds,
-// 					totalDenieds,
-// 					total,
-// 					approvalRate,
-// 				},
-// 			});
-// 		} catch (error) {
-// 			console.error(error);
-// 			throw new Error("Erro interno.");
-// 		}
-// 	}
-// }
+			return right({
+				result: {
+					totalPendings,
+					totalApproveds,
+					totalDenieds,
+					total,
+					approvalRate,
+				},
+			});
+		} catch (error) {
+			console.error(error);
+			return left(new Error("Internal error."));
+		}
+	}
+}

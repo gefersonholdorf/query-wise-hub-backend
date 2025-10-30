@@ -11,7 +11,7 @@ export interface PaginationParams {
 
 export interface FilteringParams {
 	status?: "PENDING" | "APPROVED" | "DENIED";
-	filter?: string;
+	title?: string;
 }
 
 export interface KnowledgeCardsSummary {
@@ -33,20 +33,19 @@ export interface GetKnowledgeByIdResponse extends Knowledge {
 
 export interface KnowledgeRepository {
 	create(data: CreateKnowledge): Promise<{ knowledgeId: number }>;
-	// createAnalysis(data: CreateKnowledge): Promise<{ knowledgeId: number }>;
+	createAnalysis(data: CreateKnowledge): Promise<{ knowledgeId: number }>;
 	getAll(
 		pagination: PaginationParams,
 		filtering: FilteringParams,
 	): Promise<{
 		knowledges: FetchKnowledges[];
-		total: number;
 		page: number;
-		pageSize: number;
+		perPage: number;
+		total: number;
 		totalPages: number;
-		totalPerPage: number;
 	}>;
 	getKnowledges(): Promise<{ knowledge: FetchKnowledges[] }>;
-	// summary(): Promise<{ summary: KnowledgeCardsSummary }>;
+	summary(): Promise<{ summary: KnowledgeCardsSummary }>;
 	getById(id: number): Promise<{ knowledge: GetKnowledgeByIdResponse | null }>;
-	// save(Knowledge: Knowledge, id: number): Promise<never>;
+	save(Knowledge: Knowledge, id: number): Promise<void>;
 }

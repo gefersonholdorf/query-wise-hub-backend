@@ -10,6 +10,13 @@ import { getUserByIdRoute } from "./routes/users/get-user-by-id-route";
 import { createKnowledgeRoute } from "./routes/knowledge/create-knowledge-route";
 import { matchKnowledgeRoute } from "./routes/knowledge/match-knowledge-route";
 import { fetchKnowledgeToAnalyzeRoute } from "./routes/knowledge/fetch-knowledges-route";
+import { summaryDashboardRoute } from "./routes/dashboard/summary-dashboard-route";
+import { createAnalysisRoute } from "./routes/analysis/create-analysis-route";
+import { summaryAnalysisRoute } from "./routes/analysis/summary-analysis-route";
+import { confirmAnalysisRoute } from "./routes/analysis/confirm-analysis-route";
+import { updateAnalysisRoute } from "./routes/analysis/update-analysis-route";
+import { getAnalysisByIdRoute } from "./routes/analysis/get-analysis-by-id-route";
+import { fetchAnalysisRoute } from "./routes/analysis/fetch-analysis-route";
 
 export function httpCreateRoute(app: FastifyInstance) {
 	app.register(
@@ -28,16 +35,16 @@ export function httpCreateRoute(app: FastifyInstance) {
 			instance.register(matchKnowledgeRoute);
 			instance.register(fetchKnowledgeToAnalyzeRoute);
 
-			// instance.register(createAnalysisRoute);
-			// instance.register(fetchAnalysisRoute);
-			// instance.register(summaryAnalysisRoute);
-			// instance.register(confirmAnalysisRoute);
-			// instance.register(getAnalysisByIdRoute);
-			// instance.register(updateAnalysisRoute)
+			instance.register(createAnalysisRoute);
+			instance.register(fetchAnalysisRoute);
+			instance.register(summaryAnalysisRoute);
+			instance.register(confirmAnalysisRoute);
+			instance.register(getAnalysisByIdRoute);
+			instance.register(updateAnalysisRoute);
 
 			// instance.register(chatRoute);
 
-			// instance.register(summaryDashboardRoute);
+			instance.register(summaryDashboardRoute);
 		},
 		{
 			prefix: "/api/v1",

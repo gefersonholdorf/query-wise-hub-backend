@@ -1,89 +1,87 @@
-// /** biome-ignore-all assist/source/organizeImports: <"explanation"> */
-// import { PrismaSolutionRepository } from "../../databases/prisma/prisma-solution-repository";
-// import { PrismaStockHistoryRepository } from "../../databases/prisma/prisma-stock-history-repository";
-// import { QdrantKnowledgeBase } from "../../databases/qdrant/qdrant-knowledge-repository";
-// import { right, type Either } from "../../utils/either";
-// import { ollamaEmbeddingService } from "../ollama/ollama-embedding";
-// import { pollinationsGenerateProblems } from "../pollinations/pollinations-generate-problems";
-// import type { Service } from "../service";
+/** biome-ignore-all assist/source/organizeImports: <"explanation"> */
+import type { PrismaKnowledgeRepository } from "../../databases/prisma/prisma-knowledge-repository";
+import type { PrismaStockHistoryRepository } from "../../databases/prisma/prisma-stock-history-repository";
+import type { QdrantProblemsRepository } from "../../databases/qdrant/qdrant-problems-repository";
+import { left, right, type Either } from "../../utils/either";
+import { ollamaEmbeddingService } from "../ollama/ollama-embedding";
+import { pollinationsGenerateProblems } from "../pollinations/pollinations-generate-problems";
+import type { Service } from "../service";
 
-// export interface CreateAnalysisServiceRequest {
-// 	problem: string;
-// 	solution: string;
-// 	tags: string | null;
-// }
+export interface CreateAnalysisServiceRequest {
+	title: string;
+	problem: string;
+	solution: string;
+	tags: string | null;
+}
 
-// export type CreateAnalysisServiceResponse = Either<
-// 	never,
-// 	{ analysisId: number }
-// >;
+export type CreateAnalysisServiceResponse = Either<
+	Error,
+	{ analysisId: number }
+>;
 
-// export class CreateAnalysisService
-// 	implements
-// 		Service<CreateAnalysisServiceRequest, CreateAnalysisServiceResponse>
-// {
-// 	analysisRepository = new QdrantKnowledgeBase();
-// 	solutionRepository = new PrismaSolutionRepository();
-// 	stockHistoryRepository = new PrismaStockHistoryRepository();
+export class CreateAnalysisService
+	implements
+		Service<CreateAnalysisServiceRequest, CreateAnalysisServiceResponse>
+{
+	constructor(
+		private readonly problemsRepository: QdrantProblemsRepository,
+		private readonly knowledgeRepository: PrismaKnowledgeRepository,
+		private readonly stockHistoryRepository: PrismaStockHistoryRepository,
+	) {}
 
-// 	async execute(
-// 		request: CreateAnalysisServiceRequest,
-// 	): Promise<CreateAnalysisServiceResponse> {
-// 		const { problem, solution, tags } = request;
+	async execute(
+		request: CreateAnalysisServiceRequest,
+	): Promise<CreateAnalysisServiceResponse> {
+		const { title, problem, solution, tags } = request;
 
-// 		let newSolution: { solutionId: number };
+		const problems = await pollinationsGenerateProblems(problem);
 
-// 		const problems = await pollinationsGenerateProblems(problem);
+		try {
+			const newKnowledge = await this.knowledgeRepository.createAnalysis({
+				title,
+				solution,
+				createdById: 1,
+				isActive: true,
+				tags,
+				views: 0,
+			});
 
-// 		console.log(problems);
+			await this.stockHistoryRepository.create(
+				"Criado por ADMIN",
+				newKnowledge.knowledgeId,
+			);
 
-// 		try {
-// 			newSolution = await this.solutionRepository.createAnalysis({
-// 				solution,
-// 				createdBy: "Suporte Lusati",
-// 				isActive: true,
-// 				tags,
-// 				views: 0,
-// 			});
+			const { knowledgeId } = newKnowledge;
 
-// 			await this.stockHistoryRepository.create(
-// 				"Criado por ADMIN",
-// 				newSolution.solutionId,
-// 			);
-// 		} catch (error) {
-// 			console.error(error);
-// 			throw new Error("Erro interno.");
-// 		}
+			await Promise.all(
+				problems.map(async (problem) => {
+					const embedding = await ollamaEmbeddingService(problem);
 
-// 		const { solutionId } = newSolution;
+					const id = crypto.randomUUID();
+					const createdAt = new Date().toISOString();
 
-// 		await Promise.all(
-// 			problems.map(async (problem) => {
-// 				const embedding = await ollamaEmbeddingService(problem);
+					try {
+						await this.problemsRepository.create({
+							id,
+							vector: embedding,
+							payload: {
+								problem,
+								knowledgeId,
+								createdAt,
+							},
+						});
+					} catch (error) {
+						console.error(error);
+					}
+				}),
+			);
 
-// 				const id = crypto.randomUUID();
-// 				const createdAt = new Date().toISOString();
-// 				const updatedAt = new Date().toISOString();
-
-// 				try {
-// 					await this.analysisRepository.create({
-// 						id,
-// 						vector: embedding,
-// 						payload: {
-// 							problem,
-// 							solutionId,
-// 							createdAt,
-// 							updatedAt,
-// 						},
-// 					});
-// 				} catch (error) {
-// 					console.error(error);
-// 				}
-// 			}),
-// 		);
-
-// 		return right({
-// 			analysisId: solutionId,
-// 		});
-// 	}
-// }
+			return right({
+				analysisId: knowledgeId,
+			});
+		} catch (error) {
+			console.error(error);
+			return left(new Error("Internal error."));
+		}
+	}
+}

@@ -1,84 +1,84 @@
-// /** biome-ignore-all assist/source/organizeImports: <"explanation"> */
-// import type { KnowledgeBaseRepository } from "../../databases/repositories/knowledge-base-repository";
-// import type { SolutionRepository } from "../../databases/repositories/solution-repository";
-// import type { StockHistoryRepository } from "../../databases/repositories/stock-history-repository";
-// import { NotFoundError } from "../../errors/not-found-error";
-// import { left, right, type Either } from "../../utils/either";
-// import { ollamaEmbeddingService } from "../ollama/ollama-embedding";
-// import type { Service } from "../service";
+/** biome-ignore-all assist/source/organizeImports: <"explanation"> */
+import type { KnowledgeRepository } from "../../databases/repositories/knowledge-repository";
+import type { ProblemsRepository } from "../../databases/repositories/problems-repository";
+import type { StockHistoryRepository } from "../../databases/repositories/stock-history-repository";
+import { NotFoundError } from "../../errors/not-found-error";
+import { left, right, type Either } from "../../utils/either";
+import { ollamaEmbeddingService } from "../ollama/ollama-embedding";
+import type { Service } from "../service";
 
-// export interface UpdateAnalysisServiceRequest {
-// 	id: number;
-// 	problems: string[];
-// 	solution: string;
-// 	tags: string | null;
-// }
+export interface UpdateAnalysisServiceRequest {
+	id: number;
+	title: string;
+	problems: string[];
+	solution: string;
+	tags: string | null;
+}
 
-// export type UpdateAnalysisServiceResponse = Either<NotFoundError, {}>;
+export type UpdateAnalysisServiceResponse = Either<NotFoundError | Error, void>;
 
-// export class UpdateAnalysisService
-// 	implements
-// 		Service<UpdateAnalysisServiceRequest, UpdateAnalysisServiceResponse>
-// {
-// 	constructor(
-// 		private readonly qdrantRepository: KnowledgeBaseRepository,
-// 		private readonly solutionRepository: SolutionRepository,
-// 		private readonly stockHistoryRepository: StockHistoryRepository,
-// 	) {}
+export class UpdateAnalysisService
+	implements
+		Service<UpdateAnalysisServiceRequest, UpdateAnalysisServiceResponse>
+{
+	constructor(
+		private readonly problemsRepository: ProblemsRepository,
+		private readonly knowledgeRepository: KnowledgeRepository,
+		private readonly stockHistoryRepository: StockHistoryRepository,
+	) {}
 
-// 	async execute(
-// 		request: UpdateAnalysisServiceRequest,
-// 	): Promise<UpdateAnalysisServiceResponse> {
-// 		const { id, problems, solution, tags } = request;
+	async execute(
+		request: UpdateAnalysisServiceRequest,
+	): Promise<UpdateAnalysisServiceResponse> {
+		const { id, title, problems, solution } = request;
 
-// 		try {
-// 			const existingSolution = await this.solutionRepository.getById(id);
+		try {
+			const existingAnalysis = await this.knowledgeRepository.getById(id);
 
-// 			if (!existingSolution.solution) {
-// 				return left(new NotFoundError());
-// 			}
+			if (!existingAnalysis.knowledge) {
+				return left(new NotFoundError());
+			}
 
-// 			const solutionAnalysis = existingSolution.solution;
+			const knowledgeAnalysis = existingAnalysis.knowledge;
 
-// 			const solutionId = solutionAnalysis.id;
+			const analysisId = knowledgeAnalysis.id;
 
-// 			await this.qdrantRepository.delete(solutionId);
+			await this.problemsRepository.delete(analysisId);
 
-// 			await Promise.all(
-// 				problems.map(async (problem) => {
-// 					const embedding = await ollamaEmbeddingService(problem);
+			await Promise.all(
+				problems.map(async (problem) => {
+					const embedding = await ollamaEmbeddingService(problem);
 
-// 					const id = crypto.randomUUID();
-// 					const createdAt = new Date().toISOString();
-// 					const updatedAt = new Date().toISOString();
+					const id = crypto.randomUUID();
+					const createdAt = new Date().toISOString();
 
-// 					try {
-// 						await this.qdrantRepository.create({
-// 							id,
-// 							vector: embedding,
-// 							payload: {
-// 								problem,
-// 								solutionId,
-// 								createdAt,
-// 								updatedAt,
-// 							},
-// 						});
-// 					} catch (error) {
-// 						console.error(error);
-// 					}
-// 				}),
-// 			);
+					try {
+						await this.problemsRepository.create({
+							id,
+							vector: embedding,
+							payload: {
+								problem,
+								knowledgeId: analysisId,
+								createdAt,
+							},
+						});
+					} catch (error) {
+						console.error(error);
+					}
+				}),
+			);
 
-// 			existingSolution.solution.solution = solution;
+			existingAnalysis.knowledge.solution = solution;
+			existingAnalysis.knowledge.title = title;
 
-// 			await this.solutionRepository.save(existingSolution.solution, id);
+			await this.knowledgeRepository.save(existingAnalysis.knowledge, id);
 
-// 			await this.stockHistoryRepository.create("Atualizado por ADMIN", id);
+			await this.stockHistoryRepository.create("Atualizado por ADMIN", id);
 
-// 			return right({});
-// 		} catch (error) {
-// 			console.error(error);
-// 			throw new Error("Erro interno.");
-// 		}
-// 	}
-// }
+			return right(undefined);
+		} catch (error) {
+			console.error(error);
+			return left(new Error("Internal error."));
+		}
+	}
+}

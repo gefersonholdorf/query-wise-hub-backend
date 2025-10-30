@@ -1,9 +1,14 @@
 /** biome-ignore-all lint/complexity/noBannedTypes: <"explanation"> */
-import type { CreateKnowledge, FetchKnowledges } from "../../models/knowledge";
+import type {
+	CreateKnowledge,
+	FetchKnowledges,
+	Knowledge,
+} from "../../models/knowledge";
 import { prismaClient } from "../client";
 import type {
 	FilteringParams,
 	GetKnowledgeByIdResponse,
+	KnowledgeCardsSummary,
 	KnowledgeRepository,
 	PaginationParams,
 } from "../repositories/knowledge-repository";
@@ -27,39 +32,44 @@ export class PrismaKnowledgeRepository implements KnowledgeRepository {
 			knowledgeId: newSolution.id,
 		};
 	}
-	// async createAnalysis(data: CreateSolution): Promise<{ solutionId: number }> {
-	// 	const { solution, createdBy, tags, isActive } = data;
-	// 	const newSolution = await prismaClient.knowledge.create({
-	// 		data: {
-	// 			solution,
-	// 			createdBy,
-	// 			tags,
-	// 			isActive,
-	// 			isAnalysis: true,
-	// 			status: "PENDING",
-	// 		},
-	// 	});
-	// 	return {
-	// 		solutionId: newSolution.id,
-	// 	};
-	// }
+
+	async createAnalysis(
+		data: CreateKnowledge,
+	): Promise<{ knowledgeId: number }> {
+		const { title, solution, createdById, tags, isActive } = data;
+		const newSolution = await prismaClient.knowledge.create({
+			data: {
+				title,
+				solution,
+				createdById,
+				tags,
+				isActive,
+				isAnalysis: true,
+				status: "PENDING",
+			},
+		});
+		return {
+			knowledgeId: newSolution.id,
+		};
+	}
+
 	async getAll(
 		pagination: PaginationParams,
 		filtering: FilteringParams,
 	): Promise<{
-		solutions: FetchKnowledges[];
-		total: number;
+		knowledges: FetchKnowledges[];
 		page: number;
-		pageSize: number;
+		perPage: number;
+		total: number;
 		totalPages: number;
-		totalPerPage: number;
 	}> {
 		const { page = 1, totalPerPage = 10 } = pagination;
-		const { status } = filtering;
+		const { status, title } = filtering;
 		const knowledge = await prismaClient.knowledge.findMany({
 			where: {
 				isAnalysis: true,
 				status: status ?? undefined,
+				title: title ?? undefined,
 			},
 			orderBy: {
 				id: "desc",
@@ -67,23 +77,26 @@ export class PrismaKnowledgeRepository implements KnowledgeRepository {
 			take: totalPerPage,
 			skip: (page - 1) * totalPerPage,
 		});
-		const pageSize = solutions.length;
-		const total = await prismaClient.solutions.count({
+
+		const total = await prismaClient.knowledge.count({
 			where: {
 				isAnalysis: true,
 				status: status ?? undefined,
+				title: title ?? undefined,
 			},
 		});
+
 		const totalPages = Math.ceil(total / totalPerPage);
-		const solutionsFormated: FetchSolutions[] = solutions.map((item) => {
+		const knowledgeFormated: FetchKnowledges[] = knowledge.map((item) => {
 			const {
 				id,
+				title,
 				approvedAt,
-				approvedBy,
+				approvedById,
 				createdAt,
-				createdBy,
+				createdById,
 				deniedAt,
-				deniedBy,
+				deniedById,
 				isActive,
 				isAnalysis,
 				observation,
@@ -95,12 +108,13 @@ export class PrismaKnowledgeRepository implements KnowledgeRepository {
 			} = item;
 			return {
 				id,
+				title,
 				approvedAt,
-				approvedBy,
+				approvedById,
 				createdAt,
-				createdBy,
+				createdById,
 				deniedAt,
-				deniedBy,
+				deniedById,
 				isActive,
 				views,
 				isAnalysis,
@@ -112,12 +126,11 @@ export class PrismaKnowledgeRepository implements KnowledgeRepository {
 			};
 		});
 		return {
-			solutions: solutionsFormated,
-			total,
+			knowledges: knowledgeFormated,
 			page,
-			pageSize,
+			perPage: totalPerPage,
+			total,
 			totalPages,
-			totalPerPage,
 		};
 	}
 	async getKnowledges(): Promise<{ knowledge: FetchKnowledges[] }> {
@@ -171,37 +184,39 @@ export class PrismaKnowledgeRepository implements KnowledgeRepository {
 			knowledge: knowledgeFormated,
 		};
 	}
-	// async summary(): Promise<{ summary: SolutionCardsSummary }> {
-	// 	const totalKnowledges = await prismaClient.solutions.count();
-	// 	const totalPendings = await prismaClient.solutions.count({
-	// 		where: {
-	// 			isAnalysis: true,
-	// 			status: "PENDING",
-	// 		},
-	// 	});
-	// 	const totalApproveds = await prismaClient.solutions.count({
-	// 		where: {
-	// 			isAnalysis: true,
-	// 			status: "APPROVED",
-	// 		},
-	// 	});
-	// 	const totalDenieds = await prismaClient.solutions.count({
-	// 		where: {
-	// 			isAnalysis: true,
-	// 			status: "DENIED",
-	// 		},
-	// 	});
-	// 	const total = totalApproveds + totalDenieds + totalPendings;
-	// 	return {
-	// 		summary: {
-	// 			totalKnowledges,
-	// 			totalPendings,
-	// 			totalApproveds,
-	// 			totalDenieds,
-	// 			total,
-	// 		},
-	// 	};
-	// }
+
+	async summary(): Promise<{ summary: KnowledgeCardsSummary }> {
+		const totalKnowledges = await prismaClient.knowledge.count();
+		const totalPendings = await prismaClient.knowledge.count({
+			where: {
+				isAnalysis: true,
+				status: "PENDING",
+			},
+		});
+		const totalApproveds = await prismaClient.knowledge.count({
+			where: {
+				isAnalysis: true,
+				status: "APPROVED",
+			},
+		});
+		const totalDenieds = await prismaClient.knowledge.count({
+			where: {
+				isAnalysis: true,
+				status: "DENIED",
+			},
+		});
+		const total = totalApproveds + totalDenieds + totalPendings;
+		return {
+			summary: {
+				totalKnowledges,
+				totalPendings,
+				totalApproveds,
+				totalDenieds,
+				total,
+			},
+		};
+	}
+
 	async getById(
 		id: number,
 	): Promise<{ knowledge: GetKnowledgeByIdResponse | null }> {
@@ -245,27 +260,27 @@ export class PrismaKnowledgeRepository implements KnowledgeRepository {
 			},
 		};
 	}
-	// async save(solution: Solution, id: number): Promise<{}> {
-	// 	await prismaClient.solutions.update({
-	// 		where: {
-	// 			id,
-	// 		},
-	// 		data: {
-	// 			solution: solution.solution,
-	// 			approvedBy: solution.approvedBy,
-	// 			approvedAt: solution.approvedAt,
-	// 			createdAt: solution.createdAt,
-	// 			createdBy: solution.createdBy,
-	// 			deniedAt: solution.deniedAt,
-	// 			deniedBy: solution.deniedBy,
-	// 			isActive: solution.isActive,
-	// 			isAnalysis: solution.isAnalysis,
-	// 			observation: solution.observation,
-	// 			status: solution.status,
-	// 			tags: solution.tags,
-	// 			updatedAt: solution.updatedAt,
-	// 		},
-	// 	});
-	// 	return {};
-	// }
+
+	async save(knowledge: Knowledge, id: number): Promise<void> {
+		await prismaClient.knowledge.update({
+			where: {
+				id,
+			},
+			data: {
+				solution: knowledge.solution,
+				approvedById: knowledge.approvedById,
+				approvedAt: knowledge.approvedAt,
+				createdAt: knowledge.createdAt,
+				createdById: knowledge.createdById,
+				deniedAt: knowledge.deniedAt,
+				deniedById: knowledge.deniedById,
+				isActive: knowledge.isActive,
+				isAnalysis: knowledge.isAnalysis,
+				observation: knowledge.observation,
+				status: knowledge.status,
+				tags: knowledge.tags,
+				updatedAt: knowledge.updatedAt,
+			},
+		});
+	}
 }
