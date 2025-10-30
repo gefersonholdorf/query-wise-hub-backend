@@ -1,10 +1,10 @@
 /** biome-ignore-all assist/source/organizeImports: <"explanation"> */
-import { PrismaSolutionRepository } from "../../databases/prisma/prisma-solution-repository";
-import { right, type Either } from "../../utils/either";
+import type { PrismaKnowledgeRepository } from "../../databases/prisma/prisma-knowledge-repository";
+import { left, right, type Either } from "../../utils/either";
 import type { Service } from "../service";
 
 export type SummaryAnalysisServiceResponse = Either<
-	never,
+	Error,
 	{
 		result: {
 			totalPendings: number;
@@ -19,17 +19,19 @@ export type SummaryAnalysisServiceResponse = Either<
 export class SummaryAnalysisService
 	implements Service<never, SummaryAnalysisServiceResponse>
 {
-	solutionRepository = new PrismaSolutionRepository();
+	constructor(
+		private readonly knowledgeRepository: PrismaKnowledgeRepository,
+	) {}
 
 	async execute(): Promise<SummaryAnalysisServiceResponse> {
 		try {
-			const summaryAnalysis = await this.solutionRepository.summary();
+			const summaryAnalysis = await this.knowledgeRepository.summary();
 
 			const { total, totalApproveds, totalDenieds, totalPendings } =
 				summaryAnalysis.summary;
 
 			const approvalRate = Math.ceil(
-				(totalApproveds / (totalApproveds + totalDenieds)) * 100,
+				(totalApproveds / (totalApproveds + totalDenieds)) * 100 || 0,
 			);
 
 			return right({
@@ -43,7 +45,7 @@ export class SummaryAnalysisService
 			});
 		} catch (error) {
 			console.error(error);
-			throw new Error("Erro interno.");
+			return left(new Error("Internal error."));
 		}
 	}
 }

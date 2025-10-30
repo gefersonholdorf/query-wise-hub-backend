@@ -1,21 +1,21 @@
 /** biome-ignore-all assist/source/organizeImports: <"explanation"> */
-import { PrismaSolutionRepository } from "../../databases/prisma/prisma-solution-repository";
-import { QdrantKnowledgeBase } from "../../databases/qdrant/qdrant-knowledge-repository";
-import { right, type Either } from "../../utils/either";
+import type { PrismaKnowledgeRepository } from "../../databases/prisma/prisma-knowledge-repository";
+import type { QdrantProblemsRepository } from "../../databases/qdrant/qdrant-problems-repository";
+import { left, right, type Either } from "../../utils/either";
 import { ollamaEmbeddingService } from "../ollama/ollama-embedding";
 import type { Service } from "../service";
 
 export interface MatchKnowledgeServiceResponseResult {
-	matchs: {
+	matchs: ({
 		id: string;
 		version: number;
 		score: number;
 		problem: string;
-		solution: {
-			solutionId: number;
+		knowledge: {
+			knowledgeId: number;
 			solution: string;
 		};
-	}[];
+	} | null)[];
 }
 
 export interface MatchKnowledgeServiceRequest {
@@ -23,7 +23,7 @@ export interface MatchKnowledgeServiceRequest {
 }
 
 export type MatchKnowledgeServiceResponse = Either<
-	never,
+	Error,
 	MatchKnowledgeServiceResponseResult
 >;
 
@@ -31,8 +31,10 @@ export class MatchKnowledgeService
 	implements
 		Service<MatchKnowledgeServiceRequest, MatchKnowledgeServiceResponse>
 {
-	knowledgeRepository = new QdrantKnowledgeBase();
-	solutionRepository = new PrismaSolutionRepository();
+	constructor(
+		private readonly problemsRepository: QdrantProblemsRepository,
+		private readonly knowledgeRepository: PrismaKnowledgeRepository,
+	) {}
 
 	async execute(
 		request: MatchKnowledgeServiceRequest,
@@ -42,7 +44,7 @@ export class MatchKnowledgeService
 		const embedding = await ollamaEmbeddingService(message);
 
 		try {
-			const result = await this.knowledgeRepository.searchMatch(embedding);
+			const result = await this.problemsRepository.searchMatch(embedding);
 
 			const response = result.data
 				.filter((item) => item.score >= 0.7)
@@ -51,17 +53,23 @@ export class MatchKnowledgeService
 			return right({
 				matchs: await Promise.all(
 					response.map(async (item) => {
-						const solution = await this.solutionRepository.getById(
-							item.payload.solutionId,
+						const knowledge = await this.knowledgeRepository.getById(
+							item.payload.knowledgeId,
 						);
+
+						if (!knowledge.knowledge) {
+							return null;
+						}
+
+						const { knowledge: knowledgeDetail } = knowledge;
 						return {
 							id: item.id,
 							version: item.version,
 							score: item.score,
 							problem: item.payload.problem,
-							solution: {
-								solutionId: solution.solution?.id || 0,
-								solution: solution.solution?.solution || "",
+							knowledge: {
+								knowledgeId: knowledgeDetail.id,
+								solution: knowledgeDetail.solution,
 							},
 						};
 					}),
@@ -69,10 +77,7 @@ export class MatchKnowledgeService
 			});
 		} catch (error) {
 			console.error(error);
+			return left(new Error("Internal error."));
 		}
-
-		return right({
-			matchs: [],
-		});
 	}
 }

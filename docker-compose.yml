@@ -1,22 +1,6 @@
 version: "3.9"
 
 services:
-  # mysql:
-  #   image: mysql:8.0
-  #   container_name: qw_mysql
-  #   restart: unless-stopped
-  #   environment:
-  #     MYSQL_ROOT_PASSWORD: root
-  #     MYSQL_DATABASE: querywise
-  #     MYSQL_USER: query
-  #     MYSQL_PASSWORD: wise
-  #   ports:
-  #     - "3306:3306"
-  #   # volumes:
-  #   #   - ./mysql_data:/var/lib/mysql
-  #   networks:
-  #     - appnet
-
   qdrant:
     image: qdrant/qdrant:latest
     container_name: qw_qdrant
@@ -42,7 +26,12 @@ services:
       - qdrant
     networks:
       - appnet
+      - f_net
 
 networks:
+  f_net:
+    external: true
+    name: docker_f_net
   appnet:
     driver: bridge
+

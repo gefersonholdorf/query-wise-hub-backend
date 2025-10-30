@@ -7,17 +7,17 @@ export const healthRoute: FastifyPluginCallbackZod = (app) => {
 		{
 			schema: {
 				tags: ["Health"],
-				summary: "Verifica a saúde da aplicação.",
-				description: "Responsável por verificar se a API esta UP.",
+				summary: "Application Health Check",
+				description: "Verifies the health status of the application.",
 				response: {
 					200: z.object({
-						status: z.string(),
+						status: z.boolean(),
 					}),
 				},
 			},
 		},
 		async (_, reply) => {
-			return reply.status(200).send({ status: "up" });
+			return reply.status(200).send({ status: true });
 		},
 	);
 };

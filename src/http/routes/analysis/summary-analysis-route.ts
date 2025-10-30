@@ -1,18 +1,28 @@
 // routes/knowledge/summary-knowledge-route.ts
+/** biome-ignore-all assist/source/organizeImports: <"explanation"> */
 import type { FastifyPluginCallbackZod } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { SummaryAnalysisService } from "../../../services/analysis/summary-analysis-service";
+import { PrismaKnowledgeRepository } from "../../../databases/prisma/prisma-knowledge-repository";
+import { PrismaSessionRepository } from "../../../databases/prisma/prisma-session-repository";
+import { authenticate } from "../../../decorators/authenticate";
+
+const prismaKnowledgeRepository = new PrismaKnowledgeRepository();
+const prismaSessionRepository = new PrismaSessionRepository();
 
 export const summaryAnalysisRoute: FastifyPluginCallbackZod = (app) => {
-	const summaryAnalysisService = new SummaryAnalysisService();
+	const summaryAnalysisService = new SummaryAnalysisService(
+		prismaKnowledgeRepository,
+	);
 
 	app.get(
 		"/analysis/summary",
 		{
+			preHandler: [authenticate(app, prismaSessionRepository)],
 			schema: {
 				tags: ["Analysis"],
 				summary: "Summary Analysis",
-				description: "Quantitative summaries by isAnalysis are true",
+				description: "Retrieves a summary of analyses.",
 				response: {
 					200: z.object({
 						totalPendings: z.number(),
@@ -33,7 +43,7 @@ export const summaryAnalysisRoute: FastifyPluginCallbackZod = (app) => {
 			if (serviceResponse.isLeft()) {
 				return reply
 					.status(500)
-					.send({ message: "Erro ao listar resumo de análises." });
+					.send({ message: "Error listing analysis summary." });
 			}
 
 			const {

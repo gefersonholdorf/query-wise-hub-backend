@@ -6,11 +6,11 @@ const client = new QdrantClient({
 });
 
 async function createCollection() {
-	await client.createCollection("knowledge_base", {
+	await client.createCollection("problems", {
 		vectors: { size: 1024, distance: "Cosine" },
 	});
 
-	console.log("Coleção criada com sucesso!");
+	console.log("Collection created successfully!");
 }
 
 createCollection();
