@@ -30,7 +30,7 @@ export class ConfirmAnalysisService
 		const { id, status, observation, userId } = request;
 
 		try {
-			const getSolution = await this.knowledgeRepository.getById(id);
+			const getSolution = await this.knowledgeRepository.getAnalysisById(id);
 
 			const { knowledge } = getSolution;
 

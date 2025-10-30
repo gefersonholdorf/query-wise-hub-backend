@@ -60,7 +60,7 @@ export const confirmAnalysisRoute: FastifyPluginCallbackZod = (app) => {
 			if (serviceResponse.isLeft()) {
 				if (serviceResponse.value instanceof NotFoundError) {
 					return reply.status(404).send({
-						message: "Entity not found.",
+						message: "Analysis not found.",
 					});
 				}
 

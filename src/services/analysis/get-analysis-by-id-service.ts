@@ -54,7 +54,7 @@ export class GetAnalysisByIdService
 
 		try {
 			const existingSlution =
-				await this.knowledgeRepository.getById(analysisId);
+				await this.knowledgeRepository.getAnalysisById(analysisId);
 
 			const { knowledge: data } = existingSlution;
 

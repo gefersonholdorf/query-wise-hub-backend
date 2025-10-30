@@ -47,5 +47,8 @@ export interface KnowledgeRepository {
 	getKnowledges(): Promise<{ knowledge: FetchKnowledges[] }>;
 	summary(): Promise<{ summary: KnowledgeCardsSummary }>;
 	getById(id: number): Promise<{ knowledge: GetKnowledgeByIdResponse | null }>;
+	getAnalysisById(
+		id: number,
+	): Promise<{ knowledge: GetKnowledgeByIdResponse | null }>;
 	save(Knowledge: Knowledge, id: number): Promise<void>;
 }

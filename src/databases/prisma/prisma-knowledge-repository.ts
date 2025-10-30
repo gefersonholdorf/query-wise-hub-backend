@@ -261,6 +261,51 @@ export class PrismaKnowledgeRepository implements KnowledgeRepository {
 		};
 	}
 
+	async getAnalysisById(
+		id: number,
+	): Promise<{ knowledge: GetKnowledgeByIdResponse | null }> {
+		const knowledge = await prismaClient.knowledge.findUnique({
+			where: {
+				id,
+				isAnalysis: true,
+			},
+		});
+		if (!knowledge) {
+			return {
+				knowledge: null,
+			};
+		}
+		const stockHistory = await prismaClient.stockHistory.findMany({
+			where: {
+				knowledgeId: id,
+			},
+			orderBy: {
+				id: "desc",
+			},
+		});
+		return {
+			knowledge: {
+				id,
+				title: knowledge.title,
+				approvedAt: knowledge.approvedAt,
+				approvedById: knowledge.approvedById,
+				createdAt: knowledge.createdAt,
+				createdById: knowledge.createdById,
+				deniedAt: knowledge.deniedAt,
+				deniedById: knowledge.deniedById,
+				isActive: knowledge.isActive,
+				isAnalysis: knowledge.isAnalysis,
+				observation: knowledge.observation,
+				views: knowledge.views,
+				solution: knowledge.solution,
+				status: knowledge.status,
+				tags: knowledge.tags,
+				updatedAt: knowledge.updatedAt,
+				stockHistory: stockHistory,
+			},
+		};
+	}
+
 	async save(knowledge: Knowledge, id: number): Promise<void> {
 		await prismaClient.knowledge.update({
 			where: {

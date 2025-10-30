@@ -31,7 +31,7 @@ export class SummaryAnalysisService
 				summaryAnalysis.summary;
 
 			const approvalRate = Math.ceil(
-				(totalApproveds / (totalApproveds + totalDenieds)) * 100,
+				(totalApproveds / (totalApproveds + totalDenieds)) * 100 || 0,
 			);
 
 			return right({
