@@ -1,7 +1,6 @@
 /** biome-ignore-all assist/source/organizeImports: <"explanation"> */
 import type { FastifyPluginCallbackZod } from "fastify-type-provider-zod";
 import { z } from "zod";
-import { EntityAlreadyExistsError } from "../../../errors/entity-already-exists-error";
 import { PrismaUserRepository } from "../../../databases/prisma/prisma-user-repository";
 import { authenticate } from "../../../decorators/authenticate";
 import { PrismaSessionRepository } from "../../../databases/prisma/prisma-session-repository";

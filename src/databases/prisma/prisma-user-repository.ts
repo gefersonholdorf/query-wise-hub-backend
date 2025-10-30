@@ -22,13 +22,11 @@ export class PrismaUserRepository implements UserRepository {
 	}
 
 	async findByEmailOrCpfOrUsername(
-		email?: string,
-		cpf?: string,
-		username?: string,
+		login: string,
 	): Promise<{ user: User | null }> {
 		const user = await prismaClient.user.findFirst({
 			where: {
-				OR: [{ email: email }, { cpf: cpf }, { username: username }],
+				OR: [{ email: login }, { cpf: login }, { username: login }],
 			},
 		});
 

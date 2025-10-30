@@ -8,9 +8,7 @@ import bcryptjs from "bcryptjs";
 import type { PrismaSessionRepository } from "../../databases/prisma/prisma-session-repository";
 
 export interface LoginServiceRequest {
-	email?: string;
-	cpf?: string;
-	username?: string;
+	login: string;
 	password: string;
 	ip: string;
 	userAgent: string;
@@ -31,14 +29,11 @@ export class LoginService
 	) {}
 
 	async execute(request: LoginServiceRequest): Promise<LoginServiceResponse> {
-		const { email, cpf, username, password, ip, userAgent } = request;
+		const { login, password, ip, userAgent } = request;
 
 		try {
-			const existingUser = await this.userRepository.findByEmailOrCpfOrUsername(
-				email,
-				cpf,
-				username,
-			);
+			const existingUser =
+				await this.userRepository.findByEmailOrCpfOrUsername(login);
 
 			if (!existingUser.user) {
 				return left(new CredentialsInvalidError("Credentials invalid"));

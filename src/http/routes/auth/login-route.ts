@@ -1,3 +1,4 @@
+/** biome-ignore-all assist/source/organizeImports: <"explanation"> */
 import type { FastifyPluginCallbackZod } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { PrismaUserRepository } from "../../../databases/prisma/prisma-user-repository";
@@ -23,9 +24,7 @@ export const loginRoute: FastifyPluginCallbackZod = (app) => {
 				summary: "Login User",
 				description: "Login a user.",
 				body: z.object({
-					email: z.email().optional().or(z.literal("")),
-					cpf: z.string().optional(),
-					username: z.string().optional(),
+					login: z.string(),
 					password: z.string(),
 				}),
 				response: {
@@ -42,15 +41,13 @@ export const loginRoute: FastifyPluginCallbackZod = (app) => {
 			},
 		},
 		async (request, reply) => {
-			const { email, cpf, username, password } = request.body;
+			const { login, password } = request.body;
 
 			const ip = request.ip;
 			const userAgent = request.headers["user-agent"] || "";
 
 			const serviceResponse = await loginService.execute({
-				email,
-				cpf,
-				username,
+				login,
 				password,
 				ip,
 				userAgent,
